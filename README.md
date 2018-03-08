@@ -1,0 +1,2 @@
+# meetingManager
+Electronic meeting manager
