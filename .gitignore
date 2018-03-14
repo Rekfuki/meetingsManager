@@ -1,6 +1,7 @@
-.DC_Store
-*/.idea/*
+.DS_Store
+.idea/*
 *.mdj
-/lib/*.db
-*/docs/*
-!.gitignore
+*.iml
+lib/*.db
+docs/*
+out/*
