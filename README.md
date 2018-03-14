@@ -6,4 +6,4 @@ Electronic meeting manager
 [Initial design gdoc](https://docs.google.com/document/d/1Ia0OaeCpqOUjHvXpAwya2TcGqyZ5FfO4Xl3PDLDqyrU/edit)
 
 
-![alt text] https://i.imgur.com/MRjejen.png
+![alt text]https://i.imgur.com/MRjejen.png
