@@ -1,0 +1,6 @@
+.DC_Store
+*/.idea/*
+*.mdj
+/lib/*.db
+*/docs/*
+!.gitignore
