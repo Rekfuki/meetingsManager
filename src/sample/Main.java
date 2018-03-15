@@ -8,24 +8,29 @@ import javafx.stage.Stage;
 
 public class Main extends Application {
 
+    private static int currentEmployeeID;
+
     @Override
     public void start(Stage primaryStage) throws Exception{
-//        Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sample.fxml"));
-        Parent root = (Parent)loader.load();
-        Controller controller = loader.getController();
-        controller.stage = primaryStage;
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/startup.fxml"));
+        Parent root = loader.load();
+        LoginController controller = loader.getController();
 
         primaryStage.setTitle("Hello World");
         primaryStage.setScene(new Scene(root, 1200, 1000));
-//        Controller c = new Controller();
-//        c.fillHours(120);
-//        c.updateTimeInterval(30);
         primaryStage.show();
     }
 
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static void setCurrentEmployeeID(int id) {
+        currentEmployeeID = id;
+    }
+
+    public static int getCurrentEmployeeID() {
+        return currentEmployeeID;
     }
 }

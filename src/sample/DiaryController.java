@@ -25,7 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 
-public class Controller {
+public class DiaryController {
     @FXML public Label currentWeek;
     @FXML public JFXButton decWeek;
     @FXML public JFXButton incWeek;
@@ -34,6 +34,7 @@ public class Controller {
     @FXML public GridPane meetingsGrid;
     @FXML public TextField timeField;
     @FXML public TextField intervalField;
+    @FXML public AnchorPane rootDiaryPane;
 
 
     private Calendar startTime = Calendar.getInstance();
@@ -44,7 +45,14 @@ public class Controller {
 
     @FXML
     void initialize() {
+        // TODO: 15/03/2018 Create login window and save id received after a successful login attempt 
         db.setup();
+        System.out.printf("\nID: %d", Main.getCurrentEmployeeID());
+        AnchorPane.setRightAnchor(rootDiaryPane, 0.0);
+        AnchorPane.setBottomAnchor(rootDiaryPane, 0.0);
+        AnchorPane.setLeftAnchor(rootDiaryPane, 0.0);
+        AnchorPane.setTopAnchor(rootDiaryPane, 0.0);
+
         currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
         datePicker.setValue(LocalDate.now());
         startTime.set(Calendar.HOUR, 8);
@@ -216,7 +224,7 @@ public class Controller {
     public void dateChosen(ActionEvent actionEvent) {
         currentTime.setTime(Date.from(
                 datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-//        System.out.println(currentTime.getTime());
+        System.out.println(currentTime.getTime().toInstant());
         currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
     }
 }

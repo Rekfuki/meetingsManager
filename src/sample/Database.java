@@ -1,10 +1,19 @@
 package sample;
 
+import org.sqlite.SQLiteConfig;
+
 import java.sql.*;
 
 class Database {
 
     private Connection c;
+
+    Database() {
+        //Looks stupid, however when fist connection happens there is a slight delay and the ui lags.
+        //Therefore performing initial connection when initializing allows to avoid the lag.
+        connect();
+        disconnect();
+    }
 
     public void setup() {
         connect();
@@ -94,13 +103,13 @@ class Database {
     }
 
     private void connect() {
-        if(c != null) {
-            return;
-        }
-
         try {
+            System.out.println("Connection is closed, tyring to open the connection");
             Class.forName("org.sqlite.JDBC");
-            c = DriverManager.getConnection("jdbc:sqlite:meetings.db");
+            SQLiteConfig config = new SQLiteConfig();
+            config.enforceForeignKeys(true);
+            c = DriverManager.getConnection("jdbc:sqlite:meetings.db", config.toProperties());
+            System.out.println("successfully connected to the database");
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
@@ -112,5 +121,60 @@ class Database {
         } catch (Exception e ){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
+    }
+
+    public int getEmployeeID(String usrnm, String pswd) {
+        System.out.println(usrnm +"\n"+ pswd);
+        connect();
+        try {
+            PreparedStatement stmt =  c.prepareStatement("select id from employees where login=? and paswd=?");
+            stmt.setString(1, usrnm);
+            stmt.setString(2, pswd);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.next()) {
+                System.out.println("Login found");
+                int id = rs.getInt("id");
+                disconnect();
+                return id;
+            }
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return 0;
+    }
+
+    public boolean checkUsername(String username) {
+        connect();
+        try {
+            PreparedStatement stmt = c.prepareStatement("select id from employees where login=?");
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if(!rs.next()) {
+                disconnect();
+                return true;
+            }
+        } catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return false;
+    }
+
+    public boolean addEmployee(String name, String username, String password) {
+        connect();
+        try {
+            PreparedStatement stmt = c.prepareStatement("insert into employees(name, login, paswd) values(?,?,?)");
+            stmt.setString(1, name);
+            stmt.setString(2, username);
+            stmt.setString(3, password);
+            if(stmt.executeUpdate() > 0) {
+                return true;
+            }
+        } catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
     }
 }
