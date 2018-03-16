@@ -110,6 +110,7 @@ public class LoginController {
                 if(db.addEmployee(signUpName.getText(), signUpUsername.getText(), signUpPassword.getText())) {
                     signUpLabel.setText("SUCCESS");
                     signUpLabel.setStyle("-fx-text-fill: green");
+                    // TODO: 16/03/2018 load diary window and store employee id 
                 }
             } else {
                 signUpLabel.setText("USERNAME ALREADY EXISTS");

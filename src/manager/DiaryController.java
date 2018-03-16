@@ -13,7 +13,6 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.text.Text;
-import javafx.stage.Stage;
 import org.controlsfx.control.PopOver;
 
 import java.text.DateFormat;
@@ -21,7 +20,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
@@ -64,7 +62,7 @@ public class DiaryController {
 
         currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
         datePicker.setValue(LocalDate.now());
-        startTime.set(Calendar.HOUR, 8);
+        startTime.set(Calendar.HOUR_OF_DAY, 8);
         startTime.set(Calendar.MINUTE, 0);
         interval.set(Calendar.MINUTE, 30);
 
@@ -88,7 +86,7 @@ public class DiaryController {
     }
 
     private void setupGrid() {
-        int hour = startTime.get(Calendar.HOUR);
+        int hour = startTime.get(Calendar.HOUR_OF_DAY);
         int minutes = startTime.get(Calendar.MINUTE);
 
 
@@ -254,13 +252,14 @@ public class DiaryController {
             int endM = end.get(Calendar.MONTH);
             int endD = end.get(Calendar.DAY_OF_MONTH);
 
-            System.out.println(start.getTime().toInstant());
-            System.out.println(end.getTime().toInstant());
+//            System.out.println(start.getTime().toInstant());
+//            System.out.println(end.getTime().toInstant());
 
             if(startY == endY && startM == endM && startD == endD) {
-                System.out.println("YYYY-MM-DD matches");
-                if(start.get(Calendar.HOUR) >= startTime.get(Calendar.HOUR) &&
-                        start.get(Calendar.MINUTE) >= startTime.get(Calendar.MINUTE)) {
+//                System.out.println("YYYY-MM-DD matches");
+//                System.out.printf("\nstarting hour: %d\nstarting minute: %d", startTime.get(Calendar.HOUR_OF_DAY), startTime.get(Calendar.MINUTE));
+//                System.out.printf("\nevent starting hour: %d\nevent starting minute: %d", start.get(Calendar.HOUR_OF_DAY), start.get(Calendar.MINUTE));
+                if(start.get(Calendar.HOUR_OF_DAY) >= startTime.get(Calendar.HOUR_OF_DAY)) {
                     System.out.println("Adding meeting");
                     int[] meetingPos = getMeetingPosition(start, end);
                     Pane pane = new Pane(new Label(e.getTitle()));
@@ -272,11 +271,14 @@ public class DiaryController {
     }
 
     private int[] getMeetingPosition(Calendar start, Calendar end) {
-        int minutes = ((end.get(Calendar.HOUR) * 60 + end.get(Calendar.MINUTE) -
-                start.get(Calendar.HOUR) * 60 +start.get(Calendar.MINUTE)));
+        int minutes = ((end.get(Calendar.HOUR_OF_DAY) * 60 + end.get(Calendar.MINUTE) -
+                start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE)));
 
-        int startMinute = startTime.get(Calendar.HOUR) * 60 + startTime.get(Calendar.MINUTE);
+        int startMinute = start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE) -
+                startTime.get(Calendar.HOUR_OF_DAY) * 60 - startTime.get(Calendar.MINUTE);
+
         int dayColumn = start.get(Calendar.DAY_OF_WEEK) - 1;
+        System.out.printf("\nMinutes: %d\nstartMinute: %d\ndayColumn: %d", minutes, startMinute, dayColumn);
         return new int[]{dayColumn, startMinute, minutes};
     }
 }

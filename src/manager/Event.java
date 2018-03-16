@@ -1,7 +1,9 @@
 package manager;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class Event {
     private int id;
@@ -14,8 +16,24 @@ public class Event {
         this.id = eid;
         this.title = etitle;
         this.desc = edesc;
-        this.start = Date.from(Instant.parse(estart));
-        this.end = Date.from(Instant.parse(eend));
+//        String s = Instant.parse(estart).toString();
+//        String e = Instant.parse(eend).toString();
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+        try {
+            this.start = sdf.parse(estart);
+            System.out.println(this.start);
+            this.end = sdf.parse(eend);
+            System.out.println(this.end);
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
+        }
+//        System.out.println(s);
+//        System.out.println(e);
+//        this.start = Date.from(Instant.parse(estart));
+//        this.end = Date.from(Instant.parse(eend));
     }
 
     public int getId() {
