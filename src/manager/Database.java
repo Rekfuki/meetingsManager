@@ -206,4 +206,53 @@ class Database {
         }
         return events;
     }
+
+    public void createEmployee(String name, String login, String paswd){
+        String sql = "INSERT INTO employees(name, login, paswd) VALUES(?,?,?)";
+
+        connect();
+        try(PreparedStatement pstmt = c.prepareStatement(sql)){
+            pstmt.setString(1, name);
+            pstmt.setString(2, login);
+            pstmt.setString(2, paswd);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        disconnect();
+    }
+
+    public void createEvent(String title, String description, String start, String end){
+        String sql = "INSERT INTO events(title, description, start, end) VALUES(?,?,?,?)";
+
+        connect();
+        try(PreparedStatement pstmt = c.prepareStatement(sql)){
+            pstmt.setString(1, title);
+            pstmt.setString(2, description);
+            pstmt.setString(3, start);
+            pstmt.setString(4, end);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        disconnect();
+    }
+
+    public void createTask(String title, String description, String deadline){
+        String sql = "INSERT INTO tasks(title, description, deadline) VALUES(?,?,?)";
+
+        connect();
+        try(PreparedStatement pstmt = c.prepareStatement(sql)){
+            pstmt.setString(1, title);
+            pstmt.setString(2, description);
+            pstmt.setString(3, deadline);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+
+        disconnect();
+    }
 }
