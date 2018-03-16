@@ -1,4 +1,4 @@
-package sample;
+package manager;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -14,9 +14,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/startup.fxml"));
         Parent root = loader.load();
-        LoginController controller = loader.getController();
-
-        primaryStage.setTitle("Hello World");
+        primaryStage.setTitle("Meetings Manager");
         primaryStage.setScene(new Scene(root, 1200, 1000));
         primaryStage.show();
     }

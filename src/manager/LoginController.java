@@ -1,4 +1,4 @@
-package sample;
+package manager;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXPasswordField;

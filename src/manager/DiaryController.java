@@ -1,4 +1,4 @@
-package sample;
+package manager;
 
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDatePicker;
@@ -21,8 +21,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedList;
 
 
 public class DiaryController {
@@ -41,13 +43,20 @@ public class DiaryController {
     private Calendar interval = Calendar.getInstance();
     private Calendar currentTime = Calendar.getInstance();
     private Database db = new Database();
-    public Stage stage;
+    private int employeeID;
+    private LinkedList<Event> events;
 
     @FXML
     void initialize() {
-        // TODO: 15/03/2018 Create login window and save id received after a successful login attempt 
         db.setup();
-        System.out.printf("\nID: %d", Main.getCurrentEmployeeID());
+        // TODO: 16/03/2018 change the way employeeID is stored and accessed on a top level
+        employeeID = Main.getCurrentEmployeeID();
+        events = db.getEmployeesEvents(employeeID);
+
+        for(Event e : events) {
+            e.print();
+        }
+
         AnchorPane.setRightAnchor(rootDiaryPane, 0.0);
         AnchorPane.setBottomAnchor(rootDiaryPane, 0.0);
         AnchorPane.setLeftAnchor(rootDiaryPane, 0.0);
@@ -60,20 +69,21 @@ public class DiaryController {
         interval.set(Calendar.MINUTE, 30);
 
         updateTimeInterval();
+        displayMeetings();
 //        meetingsGrid.setGridLinesVisible(true);
-        Pane p = new Pane(new Label("Test meeting"));
-
-        p.setStyle("-fx-background-color: grey");
-        p.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                System.out.print("test");
-                constructDialog(p);
-//                JFXDialog d = constructDialog();
-//                d.show();
-            }
-        });
-        meetingsGrid.add(p, 6, 123, 1, 45);
+//        Pane p = new Pane(new Label("Test meeting"));
+//
+//        p.setStyle("-fx-background-color: grey");
+//        p.addEventHandler(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                System.out.print("test");
+//                constructDialog(p);
+////                JFXDialog d = constructDialog();
+////                d.show();
+//            }
+//        });
+//        meetingsGrid.add(p, 6, 123, 1, 45);
 
     }
 
@@ -226,5 +236,47 @@ public class DiaryController {
                 datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
         System.out.println(currentTime.getTime().toInstant());
         currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
+    }
+
+    private void displayMeetings() {
+        for(Event e : events) {
+            Calendar start = Calendar.getInstance();
+            start.setTime(e.getStart());
+
+            Calendar end = Calendar.getInstance();
+            end.setTime(e.getEnd());
+
+            int startY = start.get(Calendar.YEAR);
+            int startM = start.get(Calendar.MONTH);
+            int startD = start.get(Calendar.DAY_OF_MONTH);
+
+            int endY = end.get(Calendar.YEAR);
+            int endM = end.get(Calendar.MONTH);
+            int endD = end.get(Calendar.DAY_OF_MONTH);
+
+            System.out.println(start.getTime().toInstant());
+            System.out.println(end.getTime().toInstant());
+
+            if(startY == endY && startM == endM && startD == endD) {
+                System.out.println("YYYY-MM-DD matches");
+                if(start.get(Calendar.HOUR) >= startTime.get(Calendar.HOUR) &&
+                        start.get(Calendar.MINUTE) >= startTime.get(Calendar.MINUTE)) {
+                    System.out.println("Adding meeting");
+                    int[] meetingPos = getMeetingPosition(start, end);
+                    Pane pane = new Pane(new Label(e.getTitle()));
+                    pane.setStyle("-fx-background-color: grey");
+                    meetingsGrid.add(pane, meetingPos[0], meetingPos[1], 1, meetingPos[2]);
+                }
+            }
+        }
+    }
+
+    private int[] getMeetingPosition(Calendar start, Calendar end) {
+        int minutes = ((end.get(Calendar.HOUR) * 60 + end.get(Calendar.MINUTE) -
+                start.get(Calendar.HOUR) * 60 +start.get(Calendar.MINUTE)));
+
+        int startMinute = startTime.get(Calendar.HOUR) * 60 + startTime.get(Calendar.MINUTE);
+        int dayColumn = start.get(Calendar.DAY_OF_WEEK) - 1;
+        return new int[]{dayColumn, startMinute, minutes};
     }
 }

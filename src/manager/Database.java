@@ -1,8 +1,9 @@
-package sample;
+package manager;
 
 import org.sqlite.SQLiteConfig;
 
 import java.sql.*;
+import java.util.LinkedList;
 
 class Database {
 
@@ -176,5 +177,33 @@ class Database {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
         return false;
+    }
+
+    public LinkedList<Event> getEmployeesEvents(int id) {
+        connect();
+        LinkedList<Event> events = new LinkedList<>();
+        try {
+            PreparedStatement stmt = c.prepareStatement(
+                    "select events.* from events, employees, employees_events " +
+                    "where events.id=employees_events.event_id" +
+                    " and employees.id=employees_events.employee_id" +
+                    " and employees.id=?");
+
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()) {
+                Event event = new Event(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        rs.getString("start"),
+                        rs.getString("end")
+                );
+                events.add(event);
+            }
+        } catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return events;
     }
 }
