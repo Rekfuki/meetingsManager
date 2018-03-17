@@ -1,7 +1,6 @@
 package manager;
 
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.Date;
 import java.util.TimeZone;
 
@@ -11,13 +10,14 @@ public class Event {
     private String desc;
     private Date start;
     private Date end;
+    private int organizer;
+    private String location;
 
-    Event(int eid, String etitle, String edesc, String estart, String eend) {
+
+    Event(int eid, String etitle, String edesc, String estart, String eend, int eorg) {
         this.id = eid;
         this.title = etitle;
         this.desc = edesc;
-//        String s = Instant.parse(estart).toString();
-//        String e = Instant.parse(eend).toString();
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
@@ -30,10 +30,8 @@ public class Event {
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
         }
-//        System.out.println(s);
-//        System.out.println(e);
-//        this.start = Date.from(Instant.parse(estart));
-//        this.end = Date.from(Instant.parse(eend));
+
+        this.organizer = eorg;
     }
 
     public int getId() {
@@ -77,6 +75,20 @@ public class Event {
 
     public void setEnd(Date end) {
         this.end = end;
+    }
+    public int getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(int organizer) {
+        this.organizer = organizer;
+    }
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
     public void print(){
         System.out.printf("\nEvent id: %d\nEvent name: %s\nEvent desc: %s\nEvent start: %s\nEvent end: %s",
