@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <GridPane>
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="100.0" style="-fx-border-width: 0 0 1 0; -fx-border-color: rgba(0,0,0,0.5);">
+               <children>
+                  <Label text="Meeting Details">
+                     <font>
+                        <Font name="Helvetica" size="20.0" />
+                     </font>
+                     <padding>
+                        <Insets bottom="10.0" left="20.0" />
+                     </padding>
+                  </Label>
+               </children>
+            </VBox>
+            <FlowPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+               <children>
+                  <Label id="currentDate" text="June 25 2018">
+                     <padding>
+                        <Insets left="20.0" />
+                     </padding>
+                     <font>
+                        <Font name="Helvetica" size="13.0" />
+                     </font>
+                  </Label>
+                  <Label id="currentTime" text="16:34">
+                     <padding>
+                        <Insets left="20.0" />
+                     </padding>
+                     <font>
+                        <Font name="Helvetica" size="13.0" />
+                     </font>
+                  </Label>
+               </children>
+            </FlowPane>
+            <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="2">
+               <GridPane.margin>
+                  <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+               </GridPane.margin>
+               <children>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <FlowPane alignment="CENTER_LEFT" maxHeight="35.0" prefHeight="200.0" prefWidth="200.0">
+                           <children>
+                              <Label alignment="CENTER" text="Meeting Subject: ">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="meetingSubject" text="Label">
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font></Label>
+                           </children>
+                        </FlowPane>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                           <children>
+                              <Label text="Meeting Date: ">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="meetingDate" text="Label">
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font></Label>
+                           </children>
+                        </FlowPane>
+                        <GridPane maxHeight="25.0" GridPane.rowIndex="2">
+                          <columnConstraints>
+                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Start time: ">
+                                       <font>
+                                          <Font name="Helvetica Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Label id="meetingStart" text="Label">
+                                       <font>
+                                          <Font name="Helvetica" size="13.0" />
+                                       </font></Label>
+                                 </children>
+                              </FlowPane>
+                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
+                                 <children>
+                                    <Label text="End time: ">
+                                       <font>
+                                          <Font name="Helvetica Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Label id="meetingEnd" text="Label">
+                                       <font>
+                                          <Font name="Helvetica" size="13.0" />
+                                       </font></Label>
+                                 </children>
+                              </FlowPane>
+                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
+                                 <children>
+                                    <Label text="Duration: ">
+                                       <font>
+                                          <Font name="Helvetica Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Label id="meetingDuration" text="Label">
+                                       <font>
+                                          <Font name="Helvetica" size="13.0" />
+                                       </font></Label>
+                                 </children>
+                              </FlowPane>
+                           </children>
+                        </GridPane>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                           <children>
+                              <Label text="Location: ">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="meetingLocation" text="Label">
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font></Label>
+                           </children>
+                        </FlowPane>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
+                           <children>
+                              <Label text="Description: ">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="meetingDescription" fx:id="meetingDescription" alignment="BOTTOM_LEFT" text="Label">
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font></Label>
+                           </children>
+                        </FlowPane>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5">
+                           <children>
+                              <Label text="Attendees: ">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="meetingAttendees" text="Label">
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </FlowPane>
+                     </children>
+                  </GridPane>
+               </children>
+            </StackPane>
+         </children>
+      </GridPane>
+   </children>
+</StackPane>
