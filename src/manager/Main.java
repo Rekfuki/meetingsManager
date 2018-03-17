@@ -12,7 +12,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/startup.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/diary.fxml"));
         Parent root = loader.load();
         primaryStage.setTitle("Meetings Manager");
         primaryStage.setScene(new Scene(root, 1200, 1000));
