@@ -10,7 +10,7 @@ class Database {
     private Connection c;
 
     Database() {
-        //Looks stupid, however when fist connection happens there is a slight delay and the ui lags.
+        //Looks stupid, however when first connection happens there is a slight delay and the ui lags.
         //Therefore performing initial connection when initializing allows to avoid the lag.
         connect();
         disconnect();
@@ -179,7 +179,7 @@ class Database {
         return false;
     }
 
-    public LinkedList<Event> getEmployeesEvents(int id) {
+    public LinkedList<Event> getEmployeeEvents(int employeeId) {
         connect();
         LinkedList<Event> events = new LinkedList<>();
         try {
@@ -189,7 +189,7 @@ class Database {
                     " and employees.id=employees_events.employee_id" +
                     " and employees.id=?");
 
-            stmt.setInt(1, id);
+            stmt.setInt(1, employeeId);
             ResultSet rs = stmt.executeQuery();
             while(rs.next()) {
                 Event event = new Event(
@@ -197,14 +197,41 @@ class Database {
                         rs.getString("title"),
                         rs.getString("description"),
                         rs.getString("start"),
-                        rs.getString("end")
+                        rs.getString("end"),
+                        rs.getInt("organizer")
                 );
                 events.add(event);
             }
         } catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
+        disconnect();
         return events;
+    }
+
+    public LinkedList<Employee> getEventAttendees(int eventId) {
+        connect();
+        LinkedList<Employee> employees = new LinkedList<>();
+        try {
+            PreparedStatement stmt = c.prepareStatement(
+                    "select employees.id, employees.name from employees, employees_events " +
+                            "where employees.id = employees_events.employee_id " +
+                            "and employees_events.event_id = ?");
+
+            stmt.setInt(1, eventId);
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()) {
+                Employee employee = new Employee(
+                        rs.getString("name"),
+                        rs.getInt("id")
+                );
+                employees.add(employee);
+            }
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return employees;
     }
 
     public void createEmployee(String name, String login, String paswd){
