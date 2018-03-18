@@ -146,6 +146,29 @@ class Database {
         return 0;
     }
 
+    public Employee getEmployeeByID(int id) {
+        connect();
+        try {
+            System.out.println("Trying to get employee");
+            PreparedStatement stmt = c.prepareStatement("select id, name from employees where id=?");
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.next()) {
+                Employee employee = new Employee(
+                        rs.getString("name"),
+                        rs.getInt("id"));
+                disconnect();
+                return employee;
+            }
+
+        } catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return null;
+    }
+
     public boolean checkUsername(String username) {
         connect();
         try {
@@ -198,7 +221,8 @@ class Database {
                         rs.getString("description"),
                         rs.getString("start"),
                         rs.getString("end"),
-                        rs.getInt("organizer")
+                        rs.getInt("organizer"),
+                        rs.getInt("priority")
                 );
                 events.add(event);
             }

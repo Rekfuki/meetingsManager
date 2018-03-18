@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.FlowPane?>
@@ -10,21 +11,22 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1">
    <children>
-      <GridPane>
+      <GridPane id="detailedMeetingGrid">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
         </columnConstraints>
         <rowConstraints>
             <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="350.0" minHeight="350.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="100.0" style="-fx-border-width: 0 0 1 0; -fx-border-color: rgba(0,0,0,0.5);">
+            <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="100.0" style="-fx-border-width: 0 0 1 0; -fx-border-color: white; -fx-background-color: rgb(49, 68, 99);">
                <children>
-                  <Label text="Meeting Details">
+                  <Label text="Meeting Details" textFill="WHITE">
                      <font>
                         <Font name="Helvetica" size="20.0" />
                      </font>
@@ -34,9 +36,9 @@
                   </Label>
                </children>
             </VBox>
-            <FlowPane prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+            <FlowPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: rgb(49, 68, 99);" GridPane.rowIndex="1">
                <children>
-                  <Label id="currentDate" text="June 25 2018">
+                  <Label id="currentDate" text="June 25 2018" textFill="WHITE">
                      <padding>
                         <Insets left="20.0" />
                      </padding>
@@ -44,7 +46,7 @@
                         <Font name="Helvetica" size="13.0" />
                      </font>
                   </Label>
-                  <Label id="currentTime" text="16:34">
+                  <Label id="currentTime" text="16:34" textFill="WHITE">
                      <padding>
                         <Insets left="20.0" />
                      </padding>
@@ -59,141 +61,220 @@
                   <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                </GridPane.margin>
                <children>
-                  <GridPane>
+                  <GridPane id="meetingContentGrid">
                     <columnConstraints>
-                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="30.0" />
+                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="ALWAYS" />
                     </rowConstraints>
                      <children>
-                        <FlowPane alignment="CENTER_LEFT" maxHeight="35.0" prefHeight="200.0" prefWidth="200.0">
+                        <FlowPane alignment="CENTER_LEFT" maxHeight="35.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-width: 0,0,1,0; -fx-border-color: black;">
                            <children>
-                              <Label alignment="CENTER" text="Meeting Subject: ">
+                              <Label alignment="BOTTOM_LEFT" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Meeting Subject: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica Bold" size="13.0" />
+                                    <Font name="Helvetica Bold" size="15.0" />
                                  </font>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                                 <opaqueInsets>
+                                    <Insets />
+                                 </opaqueInsets>
+                                 <cursor>
+                                    <Cursor fx:constant="DEFAULT" />
+                                 </cursor>
+                                 <FlowPane.margin>
+                                    <Insets right="5.0" />
+                                 </FlowPane.margin>
                               </Label>
-                              <Label id="meetingSubject" text="Label">
+                              <Label id="meetingSubject" text="Testing meeting 2">
                                  <font>
-                                    <Font name="Helvetica" size="13.0" />
+                                    <Font name="Helvetica Oblique" size="15.0" />
                                  </font></Label>
                            </children>
                         </FlowPane>
                         <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
                            <children>
-                              <Label text="Meeting Date: ">
+                              <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Meeting Date: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica Bold" size="13.0" />
+                                    <Font name="Helvetica Bold" size="15.0" />
                                  </font>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                                 <FlowPane.margin>
+                                    <Insets right="5.0" />
+                                 </FlowPane.margin>
                               </Label>
-                              <Label id="meetingDate" text="Label">
+                              <Label id="meetingDate" text="2018-03-15">
                                  <font>
-                                    <Font name="Helvetica" size="13.0" />
+                                    <Font name="Helvetica" size="15.0" />
                                  </font></Label>
                            </children>
                         </FlowPane>
-                        <GridPane maxHeight="25.0" GridPane.rowIndex="2">
-                          <columnConstraints>
-                              <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                          </columnConstraints>
-                          <rowConstraints>
-                            <RowConstraints minHeight="10.0" prefHeight="25.0" vgrow="SOMETIMES" />
-                          </rowConstraints>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
                            <children>
-                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0">
-                                 <children>
-                                    <Label text="Start time: ">
-                                       <font>
-                                          <Font name="Helvetica Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <Label id="meetingStart" text="Label">
-                                       <font>
-                                          <Font name="Helvetica" size="13.0" />
-                                       </font></Label>
-                                 </children>
-                              </FlowPane>
-                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1">
-                                 <children>
-                                    <Label text="End time: ">
-                                       <font>
-                                          <Font name="Helvetica Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <Label id="meetingEnd" text="Label">
-                                       <font>
-                                          <Font name="Helvetica" size="13.0" />
-                                       </font></Label>
-                                 </children>
-                              </FlowPane>
-                              <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="2">
-                                 <children>
-                                    <Label text="Duration: ">
-                                       <font>
-                                          <Font name="Helvetica Bold" size="13.0" />
-                                       </font>
-                                    </Label>
-                                    <Label id="meetingDuration" text="Label">
-                                       <font>
-                                          <Font name="Helvetica" size="13.0" />
-                                       </font></Label>
-                                 </children>
-                              </FlowPane>
-                           </children>
-                        </GridPane>
-                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
-                           <children>
-                              <Label text="Location: ">
+                              <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Start time: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica Bold" size="13.0" />
+                                    <Font name="Helvetica Bold" size="15.0" />
+                                 </font>
+                                 <FlowPane.margin>
+                                    <Insets right="5.0" />
+                                 </FlowPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                              </Label>
+                              <Label id="meetingStart" text="Label">
+                                 <font>
+                                    <Font name="Helvetica Oblique" size="15.0" />
                                  </font>
                               </Label>
-                              <Label id="meetingLocation" text="Label">
+                           </children>
+                        </FlowPane>
+                        <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                           <children>
+                              <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="End time: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica" size="13.0" />
-                                 </font></Label>
+                                    <Font name="Helvetica Bold" size="15.0" />
+                                 </font>
+                                 <FlowPane.margin>
+                                    <Insets right="5.0" />
+                                 </FlowPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                              </Label>
+                              <Label id="meetingEnd" text="Label">
+                                 <font>
+                                    <Font name="Helvetica Oblique" size="15.0" />
+                                 </font>
+                              </Label>
                            </children>
                         </FlowPane>
                         <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
                            <children>
-                              <Label text="Description: ">
+                              <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Duration: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica Bold" size="13.0" />
+                                    <Font name="Helvetica Bold" size="15.0" />
+                                 </font>
+                                 <FlowPane.margin>
+                                    <Insets right="5.0" />
+                                 </FlowPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                              </Label>
+                              <Label id="meetingDuration" text="Label">
+                                 <font>
+                                    <Font name="Helvetica Oblique" size="15.0" />
                                  </font>
                               </Label>
-                              <Label id="meetingDescription" fx:id="meetingDescription" alignment="BOTTOM_LEFT" text="Label">
-                                 <font>
-                                    <Font name="Helvetica" size="13.0" />
-                                 </font></Label>
                            </children>
                         </FlowPane>
                         <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5">
                            <children>
-                              <Label text="Attendees: ">
+                              <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Location: " textFill="WHITE">
                                  <font>
-                                    <Font name="Helvetica Bold" size="13.0" />
+                                    <Font name="Helvetica Bold" size="15.0" />
                                  </font>
+                                 <FlowPane.margin>
+                                    <Insets bottom="2.0" right="5.0" />
+                                 </FlowPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
                               </Label>
-                              <Label id="meetingAttendees" text="Label">
+                              <Label id="meetingLocation">
                                  <font>
-                                    <Font name="Helvetica" size="13.0" />
+                                    <Font name="Helvetica" size="15.0" />
+                                 </font></Label>
+                           </children>
+                        </FlowPane>
+                        <GridPane GridPane.rowIndex="6">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="-Infinity" vgrow="ALWAYS" />
+                          </rowConstraints>
+                           <children>
+                              <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Description: " textFill="WHITE">
+                                 <font>
+                                    <Font name="Helvetica Bold" size="15.0" />
+                                 </font>
+                                 <GridPane.margin>
+                                    <Insets bottom="3.0" right="3.0" top="3.0" />
+                                 </GridPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                              </Label>
+                              <Label id="meetingDescription" text="asdasasdasasdasasdasasdasasdasasdasasdasasdasasdasasdasasdasasdasasdas" wrapText="true" GridPane.columnIndex="1">
+                                 <GridPane.margin>
+                                    <Insets left="5.0" />
+                                 </GridPane.margin>
+                                 <font>
+                                    <Font name="Helvetica Oblique" size="15.0" />
                                  </font>
                               </Label>
                            </children>
-                        </FlowPane>
+                        </GridPane>
+                        <GridPane id="meetingAttendeesGrid" GridPane.rowIndex="7">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="100.0" />
+                              <ColumnConstraints hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="ALWAYS" />
+                          </rowConstraints>
+                           <children>
+                              <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Atendees: " textFill="WHITE">
+                                 <GridPane.margin>
+                                    <Insets bottom="3.0" right="3.0" top="3.0" />
+                                 </GridPane.margin>
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                                 <font>
+                                    <Font name="Helvetica Bold" size="15.0" />
+                                 </font>
+                              </Label>
+                              <Label maxWidth="5.0" minWidth="5.0" GridPane.columnIndex="2">
+                                 <padding>
+                                    <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                 </padding>
+                                 <font>
+                                    <Font name="Helvetica Oblique" size="15.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </GridPane>
                      </children>
+                     <padding>
+                        <Insets left="20.0" right="20.0" />
+                     </padding>
                   </GridPane>
                </children>
             </StackPane>
+            <GridPane GridPane.rowIndex="3">
+              <rowConstraints>
+                <RowConstraints maxHeight="1.7976931348623157E308" minHeight="0.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <columnConstraints>
+                  <ColumnConstraints />
+               </columnConstraints>
+            </GridPane>
          </children>
       </GridPane>
    </children>

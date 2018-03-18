@@ -10,6 +10,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -41,7 +42,7 @@ public class DiaryController {
 
     private Calendar startTime = Calendar.getInstance(Locale.getDefault());
     private Calendar interval = Calendar.getInstance(Locale.getDefault());
-    private Calendar currentTime = Calendar.getInstance(Locale.getDefault());
+    private Calendar currentDate = Calendar.getInstance(Locale.getDefault());
     private Database db = new Database();
     private int employeeID = 1;
     private LinkedList<Event> events;
@@ -57,15 +58,13 @@ public class DiaryController {
         // TODO: 16/03/2018 change the way employeeID is stored and accessed on a top level
         events = db.getEmployeeEvents(employeeID);
 
-
-
         AnchorPane.setRightAnchor(rootDiaryPane, 0.0);
         AnchorPane.setBottomAnchor(rootDiaryPane, 0.0);
         AnchorPane.setLeftAnchor(rootDiaryPane, 0.0);
         AnchorPane.setTopAnchor(rootDiaryPane, 0.0);
 
-        currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
-        currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentTime.get(Calendar.DAY_OF_WEEK)]);
+        currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
+        currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentDate.get(Calendar.DAY_OF_WEEK)]);
         indicateCurrentDay();
         datePicker.setValue(LocalDate.now());
 
@@ -80,6 +79,7 @@ public class DiaryController {
     }
     private void constructDialog(Event e) {
         JFXDialogLayout layout = new JFXDialogLayout();
+        JFXDialog dialog = new JFXDialog();
 
         StackPane rootPane = null;
         try {
@@ -88,10 +88,12 @@ public class DiaryController {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
         }
 
-        Label label = (Label) rootPane.lookup("#currentDate");
+        // TODO: 18/03/2018 change this from current time to time created 
+        Calendar currentTime = Calendar.getInstance();
+        Label label = (Label) rootPane.lookup("#currentTime");
         label.setText(new SimpleDateFormat("YYYY MM dd").format(currentTime.getTime()));
 
-        label = (Label) rootPane.lookup("#currentTime");
+        label = (Label) rootPane.lookup("#currentDate");
         label.setText(new SimpleDateFormat("HH:mm").format(currentTime.getTime()));
 
         label = (Label) rootPane.lookup("#meetingSubject");
@@ -116,18 +118,49 @@ public class DiaryController {
         label = (Label) rootPane.lookup("#meetingDescription");
         label.setText(e.getDesc());
 
-        label = (Label) rootPane.lookup("#meetingAttendees");
         LinkedList<Employee> attendees = db.getEventAttendees(e.getId());
-
+        GridPane gridPane = (GridPane) rootPane.lookup("#meetingAttendeesGrid");
+        label = new Label();
+        label.setStyle("-fx-font: 15 Helvetica; -fx-font-weight: Oblique;");
         StringJoiner joiner = new StringJoiner(", ");
-        for(Employee employee : attendees) {
-            joiner.add(employee.getName());
+        for(Employee emp : attendees) {
+            joiner.add(emp.getName());
         }
         label.setText(joiner.toString());
+        label.setWrapText(true);
+        gridPane.add(label, 2, 0);
 
+        gridPane = (GridPane) rootPane.lookup("#detailedMeetingGrid");
+        GridPane buttonGrid = new GridPane();
+        Button okay = createButtonForDialog("Okay");
+
+        okay.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                dialog.close();
+            }
+        });
+        buttonGrid.add(okay, 0, 0);
+
+        if(employeeID == e.getOrganizer().getId()) {
+            Button edit = createButtonForDialog("Edit");
+
+            edit.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+                    dialog.close();
+                    System.out.println("Editing");
+                }
+            });
+            buttonGrid.add(edit, 1, 0);
+        }
+        gridPane.add(buttonGrid, 0, 3);
         layout.setHeading(rootPane);
 
-        JFXDialog dialog = new JFXDialog(rootDiaryPane, layout, JFXDialog.DialogTransition.CENTER);
+        dialog.setDialogContainer(rootDiaryPane);
+        dialog.setContent(layout);
+        dialog.setTransitionType(JFXDialog.DialogTransition.CENTER);
+
         dialog.focusedProperty().addListener(new ChangeListener<Boolean>() {
             @Override
             public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -136,9 +169,22 @@ public class DiaryController {
                 }
             }
         });
-
         dialog.show();
     }
+
+    private Button createButtonForDialog(String text) {
+        Button button = new Button(text);
+        button.setMinHeight(45);
+        button.setMinWidth(100);
+        button.setStyle("-fx-background-color: rgb(49, 68, 99);" +
+                "-fx-font: Helvetica;-fx-text-fill: white");
+        GridPane.setHgrow(button, Priority.ALWAYS);
+        GridPane.setVgrow(button, Priority.ALWAYS);
+        GridPane.setHalignment(button, HPos.CENTER);
+
+        return button;
+    }
+
     private void updateTimeInterval() {
         meetingsGrid.getChildren().clear();
         DateFormat df = new SimpleDateFormat("HH:mm");
@@ -154,12 +200,12 @@ public class DiaryController {
         System.out.println(inter);
         for(int i = 1; i <= (24-h)*60; i++) {
             Pane p = new Pane();
-            p.setMinHeight(2);
+            p.setMinHeight(1);
             RowConstraints rc = new RowConstraints();
             rc.setVgrow(Priority.NEVER);
             meetingsGrid.getRowConstraints().add(rc);
             if(i % inter == 0) {
-                p.setStyle("-fx-border-width: 0 0 1 0; -fx-border-color: black");
+                p.setStyle("-fx-border-width: 0 0 1 0; -fx-border-color: rgba(1, 1, 1, 0.1)");
                 meetingsGrid.add(p, 0, i, 8, 1);
                 continue;
             }
@@ -218,7 +264,6 @@ public class DiaryController {
     }
 
     private Date verifyTime(String time, String pattern) {
-
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
         dateFormat.setLenient(false); //this will not enable 25:67 for example
         try {
@@ -235,23 +280,23 @@ public class DiaryController {
 
         switch(id) {
             case "incWeek":
-                currentTime.add(Calendar.WEEK_OF_MONTH, 1);
+                currentDate.add(Calendar.WEEK_OF_MONTH, 1);
                 break;
             case "decWeek":
-                currentTime.add(Calendar.WEEK_OF_MONTH, -1);
+                currentDate.add(Calendar.WEEK_OF_MONTH, -1);
                 break;
         }
-        currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
-        Date input = currentTime.getTime();
+        currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
+        Date input = currentDate.getTime();
         datePicker.setValue(input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
         displayMeetings();
     }
 
     public void dateChosen(ActionEvent actionEvent) {
-        currentTime.setTime(Date.from(
+        currentDate.setTime(Date.from(
                 datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        System.out.println(currentTime.getTime().toInstant());
-        currentWeek.setText(String.format("WEEK %d", currentTime.get(Calendar.WEEK_OF_MONTH)));
+        System.out.println(currentDate.getTime().toInstant());
+        currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
         indicateCurrentDay();
         displayMeetings();
     }
@@ -275,7 +320,7 @@ public class DiaryController {
 
             if(startY == endY && startM == endM && startD == endD) {
                 if(start.get(Calendar.HOUR_OF_DAY) >= startTime.get(Calendar.HOUR_OF_DAY) &&
-                        start.get(Calendar.WEEK_OF_YEAR) == currentTime.get(Calendar.WEEK_OF_YEAR)) {
+                        start.get(Calendar.WEEK_OF_YEAR) == currentDate.get(Calendar.WEEK_OF_YEAR)) {
 
                     System.out.println("Adding meeting");
                     displayedEvents.add(e);
@@ -297,22 +342,59 @@ public class DiaryController {
     }
 
     private StackPane createMeetingPane(Event event) {
-        // TODO: 17/03/2018 add formating 
         StackPane pane = new StackPane();
-        
+
         GridPane grid = new GridPane();
 
+        Label time = new Label(String.format("%s - %s",
+                new SimpleDateFormat("HH:mm").format(event.getStart()),
+                new SimpleDateFormat("HH:mm").format(event.getEnd())));
+        GridPane.setHgrow(time, Priority.ALWAYS);
+        time.setMaxWidth(Double.MAX_VALUE);
+        time.setStyle("-fx-font: 13 Helvetica");
+        grid.add(time, 0, 0);
+
         Label label = new Label(event.getTitle());
-        grid.add(label, 0, 0);
-        label = new Label(String.format("Start: %s", new SimpleDateFormat("HH:mm").format(event.getStart())));
+        label.setStyle("-fx-font: 13 Helvetica");
         grid.add(label, 0, 1);
-        label = new Label(String.format("End: %s", new SimpleDateFormat("HH:mm").format(event.getEnd())));
+
+        long span = (event.getEnd().getTime() - event.getStart().getTime()) / 60000;
+        label = new Label(String.format("Duration: %d min", span));
+        label.setStyle("-fx-font: 13 Helvetica");
         grid.add(label, 0, 2);
-        long duration = (event.getEnd().getTime() - event.getStart().getTime()) / 60000;
-        label = new Label(String.format("Duration: %d min", duration));
+
+        label = new Label(String.format("Location: %s", event.getLocation()));
+        label.setStyle("-fx-font: 13 Helvetica");
         grid.add(label, 0, 3);
-        // TODO: 17/03/2018 add coloring based on priority
-        pane.setStyle("-fx-background-color: grey");
+
+        label = new Label(String.format("Organizer: %s", event.getOrganizer().getName()));
+        label.setStyle("-fx-font: 13 Helvetica");
+        grid.add(label, 0, 4);
+
+
+        String backAndBorderCol = "";
+        String timeColor = "";
+        switch (event.getPriority()) {
+            case 0:
+                backAndBorderCol = "-fx-background-color: rgba(245, 218, 170, 0.7);" +
+                        "-fx-border-width: 2, 2, 2, 2; -fx-border-color: rgb(245, 218, 170)";
+                timeColor = "-fx-background-color: rgb(245, 218, 170)";
+                break;
+            case 1:
+                backAndBorderCol = "-fx-background-color: rgba(255, 160, 0, 0.7);" +
+                        "-fx-border-width: 2, 2, 2, 2; -fx-border-color: rgb(255, 160, 0)";
+                timeColor = "-fx-background-color: rgb(255, 160, 0)";
+                break;
+            case 2:
+                backAndBorderCol = "-fx-background-color: rgba(255, 86, 86, 0.7);" +
+                        "-fx-border-width: 2, 2, 2, 2; -fx-border-color: rgb(255, 86, 86)";
+                timeColor = "-fx-background-color: rgb(255, 86, 86)";
+                break;
+        }
+
+        time.setStyle(timeColor);
+        pane.setStyle(backAndBorderCol);
+
         pane.getChildren().addAll(grid);
 
         return pane;
@@ -337,7 +419,7 @@ public class DiaryController {
 
     private void indicateCurrentDay() {
         currentDayIndic.setStyle("-fx-border-width: 0 0 1 0; -fx-border-color: black");
-        currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentTime.get(Calendar.DAY_OF_WEEK)]);
+        currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentDate.get(Calendar.DAY_OF_WEEK)]);
         currentDayIndic.setStyle("-fx-border-width: 0 0 3 0; -fx-border-color: green");
     }
 }

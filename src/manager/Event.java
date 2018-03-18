@@ -10,11 +10,11 @@ public class Event {
     private String desc;
     private Date start;
     private Date end;
-    private int organizer;
+    private Employee organizer;
     private String location;
+    private int priority;
 
-
-    Event(int eid, String etitle, String edesc, String estart, String eend, int eorg) {
+    Event(int eid, String etitle, String edesc, String estart, String eend, int eorg, int eprio) {
         this.id = eid;
         this.title = etitle;
         this.desc = edesc;
@@ -31,7 +31,8 @@ public class Event {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
         }
 
-        this.organizer = eorg;
+        this.organizer = new Database().getEmployeeByID(eorg);
+        this.priority = eprio;
     }
 
     public int getId() {
@@ -76,11 +77,11 @@ public class Event {
     public void setEnd(Date end) {
         this.end = end;
     }
-    public int getOrganizer() {
+    public Employee getOrganizer() {
         return organizer;
     }
 
-    public void setOrganizer(int organizer) {
+    public void setOrganizer(Employee organizer) {
         this.organizer = organizer;
     }
     public String getLocation() {
@@ -89,6 +90,13 @@ public class Event {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+    public int getPriority() {
+        return priority;
+    }
+
+    public void setPriority(int priority) {
+        this.priority = priority;
     }
     public void print(){
         System.out.printf("\nEvent id: %d\nEvent name: %s\nEvent desc: %s\nEvent start: %s\nEvent end: %s",
