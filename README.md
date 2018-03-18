@@ -5,6 +5,5 @@ Electronic meeting manager
 
 [Initial design gdoc](https://docs.google.com/document/d/1Ia0OaeCpqOUjHvXpAwya2TcGqyZ5FfO4Xl3PDLDqyrU/edit)
 
-![alt text](https://i.imgur.com/7aQJFLQ.jpg)
-![alt text](https://i.imgur.com/SDrpEAL.jpg)
-![alt text](https://i.imgur.com/MRjejen.png)
+![alt text](https://i.imgur.com/7aQJFLQ.jpg "Sign In window") ![alt text](https://i.imgur.com/SDrpEAL.jpg "Sign Up Window")
+![alt text](https://i.imgur.com/TXlhk8u.png "View of meetings weekly") ![alt text](https://i.imgur.com/Gkxh6mx.png "View of detailed meeting description")
