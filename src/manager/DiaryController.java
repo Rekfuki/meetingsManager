@@ -1,9 +1,11 @@
 package manager;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXDatePicker;
-import com.jfoenix.controls.JFXDialog;
-import com.jfoenix.controls.JFXDialogLayout;
+import com.jfoenix.controls.*;
+import com.jfoenix.skins.JFXDatePickerContent;
+import com.jfoenix.skins.JFXDatePickerSkin;
+import com.jfoenix.validation.RequiredFieldValidator;
+import com.sun.javafx.scene.control.skin.DatePickerSkin;
+import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -11,6 +13,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -18,12 +21,16 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.util.Duration;
+import javafx.util.StringConverter;
+import javafx.util.converter.LocalTimeStringConverter;
+import org.controlsfx.control.spreadsheet.Grid;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -38,6 +45,21 @@ public class DiaryController {
     @FXML public TextField intervalField;
     @FXML public StackPane rootDiaryPane;
     @FXML public GridPane columnHeads;
+    @FXML public Label editMeetingTitleLabel;
+    @FXML public JFXTextField editMeetingTitle;
+    @FXML public Label editMeetingDateLabel;
+    @FXML public JFXDatePicker editMeetingDate;
+    @FXML public Label editMeetingTimeLabel;
+    @FXML public JFXTimePicker editMeetingTime;
+    @FXML public Label editMeetingDurationLabel;
+    @FXML public JFXTimePicker editMeetingDuration;
+    @FXML public JFXCheckBox editMeetingIsRecurring;
+    @FXML public GridPane editMeetingRecurrenceConf;
+    @FXML public VBox editMeetingVBox;
+    @FXML public StackPane editMeetingRootPane;
+    @FXML public JFXTextArea editMeetingDescription;
+    @FXML public JFXComboBox editMeetingAttendeesSearch;
+    @FXML public FlowPane editMeetingAttendeesList;
 
 
     private Calendar startTime = Calendar.getInstance(Locale.getDefault());
@@ -72,12 +94,233 @@ public class DiaryController {
         startTime.set(Calendar.MINUTE, 0);
         interval.set(Calendar.MINUTE, 30);
 
+        editMeetingTitle.focusedProperty().addListener((o, oldVal, newVal) ->{
+            System.out.println(editMeetingTitle.getText());
+            if(!newVal) {
+                if (editMeetingTitle.getText().equals("")) {
+                    editMeetingTitleLabel.setStyle("-fx-text-fill: red");
+                } else {
+                    editMeetingTitleLabel.setStyle(null);
+                }
+            }
+        });
+
+        editMeetingDate.focusedProperty().addListener((o, oldVal, newVal) -> {
+            System.out.println(editMeetingDate.getValue());
+            if(!newVal) {
+                if(editMeetingDate.getValue() == null) {
+                    editMeetingDateLabel.setStyle("-fx-text-fill: red");
+                }else {
+                    editMeetingDateLabel.setStyle(null);
+                }
+            }
+        });
+
+        editMeetingTime.setIs24HourView(true);
+        editMeetingTime.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
+                DateTimeFormatter.ofPattern("HH:mm")));
+
+        editMeetingTime.focusedProperty().addListener((o, oldVal, newVal) -> {
+            if(!newVal) {
+                if(editMeetingTime.getValue() == null) {
+                    editMeetingTimeLabel.setStyle("-fx-text-fill: red");
+                } else {
+                    editMeetingTimeLabel.setStyle(null);
+                }
+            }
+        });
+
+        editMeetingDuration.setIs24HourView(true);
+        editMeetingDuration.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
+                DateTimeFormatter.ofPattern("HH:mm")));
+
+        editMeetingDuration.focusedProperty().addListener((o, oldVal, newVal) -> {
+            if(!newVal) {
+                if(editMeetingDuration.getValue() == null) {
+                    editMeetingDurationLabel.setStyle("-fx-text-fill: red");
+                } else {
+                    editMeetingDurationLabel.setStyle(null);
+                }
+            }
+        });
+
+
+        editMeetingIsRecurring.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                System.out.println(editMeetingIsRecurring.isSelected());
+                if(editMeetingIsRecurring.isSelected()) {
+                    editMeetingRecurrenceConf.setDisable(false);
+                } else {
+                    editMeetingRecurrenceConf.setDisable(true);
+                }
+            }
+        });
+
+        // TODO: 19/03/2018 Add recurrence support
+
         System.out.println(Locale.getDefault() + ": " + startTime.getFirstDayOfWeek());
         updateTimeInterval();
         displayMeetings();
 
     }
-    private void constructDialog(Event e) {
+    private void constructEditEventDialog(Event e) {
+        editMeetingVBox.setDisable(false);
+        editMeetingVBox.setOpacity(1.0);
+        editMeetingVBox.setStyle("-fx-background-color: rgb(255, 255, 255, 1)");
+
+        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                meetingsGrid.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
+                FadeTransition fadeTransition = new FadeTransition();
+                fadeTransition.setDuration(Duration.millis(100));
+                fadeTransition.setNode(editMeetingVBox);
+                fadeTransition.setFromValue(1);
+                fadeTransition.setToValue(0);
+                fadeTransition.play();
+                editMeetingVBox.setDisable(true);
+                editMeetingVBox.setOpacity(0);
+            }
+        };
+        meetingsGrid.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+
+
+        editMeetingTitle.setText(e.getTitle());
+        editMeetingDate.setValue(e.getStart().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+        editMeetingTime.setValue(LocalDateTime.ofInstant(
+                e.getStart().toInstant(), ZoneId.systemDefault()).toLocalTime());
+
+
+        long duration = (e.getEnd().getTime() - e.getStart().getTime());
+        editMeetingDuration.setValue(LocalDateTime.ofInstant(Instant.ofEpochMilli(duration),
+                ZoneId.systemDefault()).toLocalTime());
+
+        // TODO: 19/03/2018 do recurrence here
+
+        editMeetingDescription.setText(e.getDesc());
+
+        LinkedList<Employee> employees = db.getEventAttendees(e.getId());
+        for(Employee emp : employees) {
+            HBox hBox = new HBox();
+
+            Label label = new Label(emp.getName());
+            label.setStyle("-fx-text-fill: white");
+            label.setMinWidth(Control.USE_COMPUTED_SIZE);
+            label.setMaxWidth(Control.USE_COMPUTED_SIZE);
+            hBox.getChildren().add(label);
+
+            Button btn = new Button("x");
+            btn.setStyle("-fx-background-color: rgba(255, 255, 255, 0); -fx-text-fill: white");
+            btn.setOnAction(new EventHandler<ActionEvent>() {
+                @Override
+                public void handle(ActionEvent event) {
+//                    employees.remove(e);
+                    editMeetingAttendeesList.getChildren().remove(hBox);
+                }
+            });
+
+            hBox.getChildren().add(btn);
+            hBox.setAlignment(Pos.CENTER);
+            hBox.setStyle("-fx-background-color: rgb(49, 68, 99);-fx-background-radius: 5;");
+            FlowPane.setMargin(hBox, new Insets(0, 5, 5, 0));
+            editMeetingAttendeesList.getChildren().add(hBox);
+        }
+//        JFXDialogLayout layout = new JFXDialogLayout();
+//        JFXDialog dialog = new JFXDialog();
+//
+//        StackPane rootPane = null;
+//
+//        try {
+//            rootPane = FXMLLoader.load(getClass().getResource("/fxml/createEvent.fxml"));
+////            rootPane = FXMLLoader.load(getClass().getResource("/fxml/meetingDetails.fxml"));
+//        } catch (Exception ex){
+//            System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
+//            return;
+//        }
+//
+//        JFXTextField title = (JFXTextField) rootPane.lookup("#editMeetingTitle");
+//        Label label[] = { (Label) rootPane.lookup("#editMeetingTitleLabel")};
+//        RequiredFieldValidator validator = new RequiredFieldValidator();
+//        validator.setMessage("Meeting title is required");
+//        title.getValidators().add(validator);
+//
+////        label[].setStyle("-fx-text-fill: red");
+//        title.focusedProperty().addListener((o, oldVal, newVal) -> {
+//            if(!newVal) {
+//                if(title.getText() == null)  {
+//                    // TODO: 19/03/2018 add actual validation
+//                    System.out.println(title.getText());
+//                    label[0].setStyle("-fx-text-fill: red");
+//                } else {
+////                    label.setStyle(null);
+//                }
+//            }
+//        });
+//
+//        JFXDatePicker meetingDatePicker = (JFXDatePicker) rootPane.lookup("#editMeetingDate");
+//        meetingDatePicker.focusedProperty().addListener((o, oldVal, newVal) -> {
+//            if(!newVal) {
+//                System.out.println(meetingDatePicker.getValue());
+//                if(meetingDatePicker.getValue() == null) {
+//                    meetingDatePicker.setStyle("-fx-text-fill: red");
+//                }
+//            }
+//        });
+//
+//        JFXTimePicker meetingTimePicker = (JFXTimePicker) rootPane.lookup("#editMeetingTime");
+//        meetingTimePicker.setIs24HourView(true);
+//        meetingTimePicker.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
+//                DateTimeFormatter.ofPattern("HH:mm")));
+//
+//        meetingTimePicker.focusedProperty().addListener((o, oldVal, newVal) -> {
+//            if(!newVal) {
+//                System.out.println(meetingTimePicker.getValue());
+//            }
+//        });
+//
+//        JFXTimePicker meetingDurationPicker = (JFXTimePicker) rootPane.lookup("#editMeetingDuration");
+//        meetingDurationPicker.setIs24HourView(true);
+//        meetingDurationPicker.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
+//                DateTimeFormatter.ofPattern("HH:mm")));
+//        meetingDurationPicker.focusedProperty().addListener((o, oldVal, newVal) -> {
+//            if(!newVal) {
+//                System.out.println(meetingDurationPicker.getValue());
+//            }
+//        });
+//
+//        JFXCheckBox isRecurring = (JFXCheckBox) rootPane.lookup("#editMeetingIsRecurring");
+//        GridPane recurrenceConf = (GridPane) rootPane.lookup("#editMeetingRecurrenceConf");
+//        isRecurring.selectedProperty().addListener(new ChangeListener<Boolean>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+//                System.out.println(isRecurring.isSelected());
+//                if(isRecurring.isSelected()) {
+//                    recurrenceConf.setDisable(false);
+//                } else {
+//                    recurrenceConf.setDisable(true);
+//                }
+//            }
+//        });
+//
+//
+//        layout.setHeading(rootPane);
+//        dialog.setDialogContainer(rootDiaryPane);
+//        dialog.setContent(layout);
+//        dialog.setTransitionType(JFXDialog.DialogTransition.CENTER);
+//
+//        dialog.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+//                if(newValue) {
+//                    dialog.close();
+//                }
+//            }
+//        });
+//        dialog.show();
+    }
+
+    private void constructDetailedMeetingDialog(Event e) {
         JFXDialogLayout layout = new JFXDialogLayout();
         JFXDialog dialog = new JFXDialog();
 
@@ -86,7 +329,10 @@ public class DiaryController {
             rootPane = FXMLLoader.load(getClass().getResource("/fxml/meetingDetails.fxml"));
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
+            return;
         }
+
+
 
         // TODO: 18/03/2018 change this from current time to time created 
         Calendar currentTime = Calendar.getInstance();
@@ -149,6 +395,7 @@ public class DiaryController {
                 @Override
                 public void handle(ActionEvent event) {
                     dialog.close();
+                    constructEditEventDialog(e);
                     System.out.println("Editing");
                 }
             });
@@ -330,7 +577,7 @@ public class DiaryController {
                         @Override
                         public void handle(MouseEvent event) {
                             StackPane p = (StackPane) event.getSource();
-                            constructDialog(displayedEvents.get(panes.indexOf(p)));
+                            constructDetailedMeetingDialog(displayedEvents.get(panes.indexOf(p)));
                             System.out.printf("\nEvent: %s", displayedEvents.get(panes.indexOf(p)).getTitle());
                         }
                     });

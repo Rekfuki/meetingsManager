@@ -40,7 +40,7 @@ public class LoginController {
         RequiredFieldValidator validator = new RequiredFieldValidator();
         validator.setMessage("NAME IS REQUIRED");
         signUpName.getValidators().add(validator);
-        signUpName.focusedProperty().addListener((o, oldval, newVal) -> {
+        signUpName.focusedProperty().addListener((o, oldVal, newVal) -> {
             if(!newVal) {
                 signUpName.validate();
             }
@@ -49,7 +49,7 @@ public class LoginController {
         validator = new RequiredFieldValidator();
         validator.setMessage("USERNAME IS REQUIRED");
         signUpUsername.getValidators().add(validator);
-        signUpUsername.focusedProperty().addListener((o, oldval, newVal) -> {
+        signUpUsername.focusedProperty().addListener((o, oldVal, newVal) -> {
             if(!newVal) {
                 signUpUsername.validate();
             }
@@ -58,7 +58,7 @@ public class LoginController {
         validator = new RequiredFieldValidator();
         validator.setMessage("PASSWORD IS REQUIRED");
         signUpPassword.getValidators().add(validator);
-        signUpPassword.focusedProperty().addListener((o, oldval, newVal) ->{
+        signUpPassword.focusedProperty().addListener((o, oldVal, newVal) ->{
             if(!newVal) {
                 signUpPassword.validate();
             }
