@@ -9,9 +9,10 @@
 <?import com.jfoenix.controls.JFXTextField?>
 <?import com.jfoenix.controls.JFXTimePicker?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.effect.DropShadow?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -23,67 +24,25 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import javafx.scene.text.Text?>
 
 <StackPane fx:id="rootDiaryPane" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="manager.DiaryController">
    <children>
       <AnchorPane maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="1000.0" prefWidth="1200.0">
          <children>
-            <AnchorPane layoutX="121.0" layoutY="-13.0" maxHeight="80.0" minHeight="80.0" prefHeight="80.0" prefWidth="676.0" style="-fx-background-color: rgb(49, 68, 99);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <AnchorPane layoutX="121.0" layoutY="-13.0" maxHeight="90.0" minHeight="90.0" prefHeight="80.0" prefWidth="676.0" style="-fx-background-color: rgb(49, 68, 99);" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                <children>
-                  <AnchorPane layoutX="-7.0" layoutY="-75.0" maxHeight="50.0" minHeight="50.0" minWidth="100.0" prefHeight="50.0" prefWidth="100.0" AnchorPane.bottomAnchor="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <VBox alignment="CENTER" layoutX="-25.0" layoutY="-75.0" prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <Label text="Diary" textFill="WHITE">
-                                 <font>
-                                    <Font size="21.0" />
-                                 </font>
-                              </Label>
-                           </children>
-                        </VBox>
-                     </children>
-                  </AnchorPane>
-                  <AnchorPane layoutX="548.0" layoutY="-75.0" maxHeight="50.0" maxWidth="450.0" minHeight="50.0" minWidth="450.0" prefHeight="50.0" prefWidth="450.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                     <children>
-                        <FlowPane alignment="TOP_RIGHT" layoutX="-114.0" layoutY="-75.0" maxHeight="50.0" maxWidth="900.0" minHeight="50.0" minWidth="900.0" prefHeight="50.0" prefWidth="900.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                           <children>
-                              <VBox alignment="TOP_CENTER" maxHeight="50.0" maxWidth="150.0" minHeight="50.0" minWidth="150.0" prefHeight="50.0" prefWidth="150.0">
-                                 <children>
-                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="SCHEDULE START" />
-                                    <TextField fx:id="timeField" alignment="CENTER" onKeyReleased="#intervalAndTimeWatcher" promptText="24 hour format" scaleShape="false" style="-fx-region-border: 0;" text="8:00" />
-                                 </children>
-                              </VBox>
-                              <VBox alignment="TOP_CENTER" maxHeight="50.0" maxWidth="150.0" minHeight="50.0" minWidth="150.0" prefHeight="50.0" prefWidth="150.0">
-                                 <children>
-                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="TIME INTERVAL" />
-                                    <TextField fx:id="intervalField" alignment="CENTER" onKeyReleased="#intervalAndTimeWatcher" text="30" />
-                                 </children>
-                              </VBox>
-                              <VBox alignment="CENTER" maxHeight="50.0" maxWidth="150.0" minHeight="50.0" minWidth="150.0" prefHeight="50.0" prefWidth="150.0">
-                                 <children>
-                                    <Text fill="WHITE" strokeType="OUTSIDE" strokeWidth="0.0" text="EVENTS">
-                                       <font>
-                                          <Font size="21.0" />
-                                       </font>
-                                    </Text>
-                                 </children>
-                              </VBox>
-                           </children>
-                        </FlowPane>
-                     </children>
-                  </AnchorPane>
-                  <GridPane layoutX="288.0" layoutY="48.0" prefHeight="30.0" prefWidth="262.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+                  <GridPane layoutX="288.0" layoutY="48.0" prefHeight="30.0" prefWidth="262.0" AnchorPane.bottomAnchor="3.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columnConstraints>
                       <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="60.0" minHeight="20.0" prefHeight="30.0" vgrow="ALWAYS" />
+                      <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
                     </rowConstraints>
                      <children>
-                        <GridPane style="-fx-border-width: 1 0 1 0; -fx-border-color: white;" GridPane.columnIndex="1">
+                        <GridPane style="-fx-border-width: 1 0 1 0; -fx-border-color: white;" GridPane.columnIndex="1" GridPane.rowIndex="1">
                           <columnConstraints>
                               <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="50.0" minWidth="10.0" prefWidth="52.0" />
                             <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="1.7976931348623157E308" minWidth="10.0" prefWidth="170.0" />
@@ -98,12 +57,54 @@
                               <JFXButton fx:id="incWeek" onMouseClicked="#changeWeekEvent" text="&gt;" textFill="WHITE" GridPane.columnIndex="2" />
                            </children>
                         </GridPane>
-                        <JFXDatePicker fx:id="datePicker" defaultColor="#314463" onAction="#dateChosen" showWeekNumbers="true" stylesheets="/css/main.css" GridPane.columnIndex="2" />
+                        <JFXDatePicker fx:id="datePicker" defaultColor="#314463" onAction="#dateChosen" showWeekNumbers="true" stylesheets="/css/main.css" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                        <FlowPane alignment="TOP_RIGHT" columnHalignment="RIGHT" prefHeight="200.0" prefWidth="200.0" GridPane.columnIndex="1" GridPane.columnSpan="2">
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="60.0">
+                                 <children>
+                                    <Label text="SCHEDULE START" textFill="WHITE">
+                                       <VBox.margin>
+                                          <Insets right="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <JFXTimePicker fx:id="scheduleStart" defaultColor="#304463" onAction="#intervalAndTimeWatcher">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </JFXTimePicker>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="CENTER" maxHeight="60.0">
+                                 <children>
+                                    <Label text="SCHEDULE END" textFill="WHITE">
+                                       <VBox.margin>
+                                          <Insets right="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <JFXTimePicker fx:id="scheduleEnd" defaultColor="#304463">
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </JFXTimePicker>
+                                 </children>
+                              </VBox>
+                              <VBox alignment="CENTER" maxHeight="60.0">
+                                 <children>
+                                    <Label text="INTERVALS" textFill="WHITE">
+                                       <VBox.margin>
+                                          <Insets right="20.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <JFXComboBox fx:id="scheduleIntervals" focusColor="WHITE" maxWidth="1.7976931348623157E308" onAction="#intervalAndTimeWatcher" style="-fx-text-fill: white;" unFocusColor="WHITE" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </FlowPane>
                      </children>
                   </GridPane>
                </children>
             </AnchorPane>
-            <AnchorPane layoutX="229.0" layoutY="236.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="77.0">
+            <AnchorPane layoutX="229.0" layoutY="236.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
                <children>
                   <GridPane fx:id="columnHeads" focusTraversable="true" layoutX="250.0" layoutY="165.0" maxHeight="27.0" minHeight="27.0" prefHeight="27.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columnConstraints>
@@ -190,157 +191,6 @@
                                           <Pane prefHeight="200.0" prefWidth="200.0" />
                                        </children>
                                     </GridPane>
-                                    <VBox fx:id="editMeetingVBox" alignment="CENTER" disable="true" maxHeight="400.0" maxWidth="600.0" opacity="0.0">
-                                       <children>
-                                          <StackPane fx:id="editMeetingRootPane" maxHeight="400.0" maxWidth="600.0" minHeight="400.0" minWidth="600.0">
-                                             <children>
-                                                <GridPane>
-                                                  <columnConstraints>
-                                                    <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="100.0" />
-                                                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0" prefWidth="100.0" />
-                                                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                  </columnConstraints>
-                                                  <rowConstraints>
-                                                    <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                  </rowConstraints>
-                                                   <children>
-                                                      <GridPane>
-                                                        <columnConstraints>
-                                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="100.0" />
-                                                        </columnConstraints>
-                                                        <rowConstraints>
-                                                            <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                            <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                        </rowConstraints>
-                                                         <children>
-                                                            <VBox maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="100.0">
-                                                               <children>
-                                                                  <Label fx:id="editMeetingTitleLabel" text="Meeting title" />
-                                                                  <JFXTextField fx:id="editMeetingTitle" maxWidth="260.0" />
-                                                               </children>
-                                                            </VBox>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
-                                                               <children>
-                                                                  <Label fx:id="editMeetingDateLabel" text="Meeting date" />
-                                                                  <JFXDatePicker fx:id="editMeetingDate" maxWidth="295.0" overLay="true" style="-fx-prompt-text-fill: rgb(255,0 ,0);" />
-                                                               </children>
-                                                            </VBox>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="2">
-                                                               <children>
-                                                                  <Label fx:id="editMeetingTimeLabel" text="Choose a time" />
-                                                                  <JFXTimePicker fx:id="editMeetingTime" editable="true" maxWidth="1.7976931348623157E308">
-                                                                     <padding>
-                                                                        <Insets bottom="5.0" right="5.0" />
-                                                                     </padding>
-                                                                  </JFXTimePicker>
-                                                               </children>
-                                                            </VBox>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="3">
-                                                               <children>
-                                                                  <Label fx:id="editMeetingDurationLabel" text="Meeting duration" />
-                                                                  <JFXTimePicker fx:id="editMeetingDuration" editable="true" maxWidth="1.7976931348623157E308" overLay="true">
-                                                                     <padding>
-                                                                        <Insets bottom="5.0" right="5.0" top="5.0" />
-                                                                     </padding>
-                                                                  </JFXTimePicker>
-                                                               </children>
-                                                            </VBox>
-                                                            <GridPane GridPane.rowIndex="4">
-                                                              <columnConstraints>
-                                                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                              </columnConstraints>
-                                                              <rowConstraints>
-                                                                  <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                  <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                              </rowConstraints>
-                                                               <children>
-                                                                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <JFXCheckBox fx:id="editMeetingIsRecurring" text="This is a recurring meeting">
-                                                                           <padding>
-                                                                              <Insets right="5.0" />
-                                                                           </padding>
-                                                                        </JFXCheckBox>
-                                                                     </children>
-                                                                  </HBox>
-                                                                  <GridPane fx:id="editMeetingRecurrenceConf" disable="true" GridPane.rowIndex="1">
-                                                                     <columnConstraints>
-                                                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                                                                     </columnConstraints>
-                                                                     <rowConstraints>
-                                                                        <RowConstraints maxHeight="50.0" minHeight="30.0" vgrow="SOMETIMES" />
-                                                                        <RowConstraints maxHeight="50.0" minHeight="-Infinity" vgrow="SOMETIMES" />
-                                                                     </rowConstraints>
-                                                                     <children>
-                                                                        <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0">
-                                                                           <children>
-                                                                              <JFXComboBox id="editMeetingRecurrence" maxWidth="260.0" promptText="This meeting recurs" />
-                                                                           </children>
-                                                                        </VBox>
-                                                                        <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
-                                                                           <children>
-                                                                              <JFXRadioButton text="Every" HBox.hgrow="NEVER" />
-                                                                              <JFXTextField id="editMeetingRecurrenceDays" alignment="CENTER" maxWidth="40.0" />
-                                                                              <Label text="day(s)" />
-                                                                           </children>
-                                                                        </HBox>
-                                                                     </children>
-                                                                  </GridPane>
-                                                               </children>
-                                                            </GridPane>
-                                                         </children>
-                                                      </GridPane>
-                                                      <GridPane GridPane.columnIndex="2">
-                                                        <columnConstraints>
-                                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                                                        </columnConstraints>
-                                                        <rowConstraints>
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-                                                        </rowConstraints>
-                                                         <children>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0">
-                                                               <children>
-                                                                  <JFXTextArea fx:id="editMeetingDescription" maxHeight="100.0" promptText="Enter meeting's description here" />
-                                                               </children>
-                                                            </VBox>
-                                                            <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
-                                                               <children>
-                                                                  <HBox>
-                                                                     <children>
-                                                                        <JFXComboBox fx:id="editMeetingAttendeesSearch" editable="true" maxWidth="1.7976931348623157E308" minWidth="-Infinity" promptText="Meeting attendeees" HBox.hgrow="ALWAYS" />
-                                                                     </children>
-                                                                  </HBox>
-                                                                  <StackPane prefHeight="150.0" prefWidth="200.0">
-                                                                     <children>
-                                                                        <FlowPane fx:id="editMeetingAttendeesList" prefHeight="200.0" prefWidth="200.0">
-                                                                           <StackPane.margin>
-                                                                              <Insets top="10.0" />
-                                                                           </StackPane.margin>
-                                                                        </FlowPane>
-                                                                     </children>
-                                                                  </StackPane>
-                                                               </children>
-                                                            </VBox>
-                                                         </children>
-                                                      </GridPane>
-                                                   </children>
-                                                </GridPane>
-                                             </children>
-                                          </StackPane>
-                                       </children>
-                                       <effect>
-                                          <DropShadow />
-                                       </effect>
-                                       <padding>
-                                          <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-                                       </padding>
-                                    </VBox>
                                  </children>
                               </StackPane>
                            </content>
@@ -351,5 +201,528 @@
             </AnchorPane>
          </children>
       </AnchorPane>
+      <VBox fx:id="meetingDetailsVBox" alignment="CENTER" disable="true" maxHeight="500.0" maxWidth="600.0" opacity="0.0">
+         <children>
+            <StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0">
+               <children>
+                  <GridPane id="detailedMeetingGrid">
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                        <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="350.0" minHeight="350.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <VBox alignment="BOTTOM_LEFT" prefHeight="200.0" prefWidth="100.0" style="-fx-border-width: 0 0 1 0; -fx-border-color: white; -fx-background-color: rgb(49, 68, 99);">
+                           <children>
+                              <Label text="Meeting Details" textFill="WHITE">
+                                 <font>
+                                    <Font name="Helvetica" size="20.0" />
+                                 </font>
+                                 <padding>
+                                    <Insets bottom="10.0" left="20.0" />
+                                 </padding>
+                              </Label>
+                           </children>
+                        </VBox>
+                        <FlowPane prefHeight="200.0" prefWidth="200.0" style="-fx-background-color: rgb(49, 68, 99);" GridPane.rowIndex="1">
+                           <children>
+                              <Label id="currentDate" text="June 25 2018" textFill="WHITE">
+                                 <padding>
+                                    <Insets left="20.0" />
+                                 </padding>
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font>
+                              </Label>
+                              <Label id="currentTime" text="16:34" textFill="WHITE">
+                                 <padding>
+                                    <Insets left="20.0" />
+                                 </padding>
+                                 <font>
+                                    <Font name="Helvetica" size="13.0" />
+                                 </font>
+                              </Label>
+                           </children>
+                        </FlowPane>
+                        <StackPane prefHeight="150.0" prefWidth="200.0" GridPane.rowIndex="2">
+                           <GridPane.margin>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </GridPane.margin>
+                           <children>
+                              <GridPane id="meetingContentGrid">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                  <RowConstraints maxHeight="30.0" />
+                                    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                  <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="30.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="-Infinity" minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                                    <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="ALWAYS" />
+                                </rowConstraints>
+                                 <children>
+                                    <FlowPane alignment="CENTER_LEFT" maxHeight="35.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-width: 0,0,1,0; -fx-border-color: black;">
+                                       <children>
+                                          <Label alignment="BOTTOM_LEFT" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Meeting Subject: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                             <opaqueInsets>
+                                                <Insets />
+                                             </opaqueInsets>
+                                             <cursor>
+                                                <Cursor fx:constant="DEFAULT" />
+                                             </cursor>
+                                             <FlowPane.margin>
+                                                <Insets right="5.0" />
+                                             </FlowPane.margin>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsSubject">
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                       <children>
+                                          <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Meeting Date: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                             <FlowPane.margin>
+                                                <Insets right="5.0" />
+                                             </FlowPane.margin>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsDate">
+                                             <font>
+                                                <Font name="Helvetica" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="2">
+                                       <children>
+                                          <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Start time: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <FlowPane.margin>
+                                                <Insets right="5.0" />
+                                             </FlowPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsStart">
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="3">
+                                       <children>
+                                          <Label minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="End time: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <FlowPane.margin>
+                                                <Insets right="5.0" />
+                                             </FlowPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsEnd">
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="4">
+                                       <children>
+                                          <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Duration: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <FlowPane.margin>
+                                                <Insets right="5.0" />
+                                             </FlowPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsDuration">
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="5">
+                                       <children>
+                                          <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Location: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <FlowPane.margin>
+                                                <Insets bottom="2.0" right="5.0" />
+                                             </FlowPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsLocation">
+                                             <font>
+                                                <Font name="Helvetica" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <FlowPane alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="200.0" GridPane.rowIndex="6">
+                                       <children>
+                                          <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Priority: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <FlowPane.margin>
+                                                <Insets bottom="2.0" right="5.0" />
+                                             </FlowPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsPriority">
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </FlowPane>
+                                    <GridPane GridPane.rowIndex="7">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints maxHeight="-Infinity" vgrow="ALWAYS" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Description: " textFill="WHITE">
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                             <GridPane.margin>
+                                                <Insets bottom="3.0" right="3.0" top="3.0" />
+                                             </GridPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsDescription" wrapText="true" GridPane.columnIndex="1">
+                                             <GridPane.margin>
+                                                <Insets left="5.0" />
+                                             </GridPane.margin>
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </GridPane>
+                                    <GridPane GridPane.rowIndex="8">
+                                      <columnConstraints>
+                                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="200.0" prefWidth="100.0" />
+                                          <ColumnConstraints hgrow="SOMETIMES" maxWidth="5.0" minWidth="5.0" prefWidth="100.0" />
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                      </columnConstraints>
+                                      <rowConstraints>
+                                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" vgrow="ALWAYS" />
+                                      </rowConstraints>
+                                       <children>
+                                          <Label maxHeight="1.7976931348623157E308" minWidth="200.0" style="-fx-background-color: rgb(49, 68, 99); -fx-background-radius: 3;" text="Atendees: " textFill="WHITE">
+                                             <GridPane.margin>
+                                                <Insets bottom="3.0" right="3.0" top="3.0" />
+                                             </GridPane.margin>
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                             <font>
+                                                <Font name="Helvetica Bold" size="15.0" />
+                                             </font>
+                                          </Label>
+                                          <Label fx:id="meetingDetailsAttendees" maxWidth="1.7976931348623157E308" minWidth="5.0" wrapText="true" GridPane.columnIndex="2">
+                                             <padding>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                                             </padding>
+                                             <font>
+                                                <Font name="Helvetica Oblique" size="15.0" />
+                                             </font>
+                                          </Label>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                                 <padding>
+                                    <Insets left="20.0" right="20.0" />
+                                 </padding>
+                              </GridPane>
+                           </children>
+                        </StackPane>
+                        <GridPane fx:id="meetingDetailsButtonsGrid" GridPane.rowIndex="3">
+                          <rowConstraints>
+                            <RowConstraints maxHeight="1.7976931348623157E308" minHeight="0.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <columnConstraints>
+                              <ColumnConstraints />
+                           </columnConstraints>
+                        </GridPane>
+                     </children>
+                  </GridPane>
+               </children>
+            </StackPane>
+         </children>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+         <effect>
+            <DropShadow />
+         </effect>
+      </VBox>
+      <VBox fx:id="editMeetingVBox" alignment="CENTER" disable="true" maxHeight="500.0" maxWidth="600.0">
+         <children>
+            <StackPane fx:id="editMeetingRootPane" maxHeight="500.0" maxWidth="600.0" minHeight="500.0" minWidth="600.0">
+               <children>
+                  <GridPane>
+                    <columnConstraints>
+                      <ColumnConstraints hgrow="SOMETIMES" maxWidth="300.0" minWidth="10.0" prefWidth="100.0" />
+                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="30.0" minWidth="10.0" prefWidth="100.0" />
+                      <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                    </columnConstraints>
+                    <rowConstraints>
+                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                        <RowConstraints maxHeight="40.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                    </rowConstraints>
+                     <children>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" maxWidth="350.0" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                              <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                              <RowConstraints maxHeight="60.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <VBox maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="90.0">
+                                 <children>
+                                    <Label fx:id="editMeetingTitleLabel" text="Meeting title" />
+                                    <JFXTextField fx:id="editMeetingTitle" maxWidth="250.0" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+                                 <children>
+                                    <Label fx:id="editMeetingDateLabel" text="Meeting date" />
+                                    <JFXDatePicker fx:id="editMeetingDate" defaultColor="#304463" maxWidth="295.0" overLay="true" style="-fx-prompt-text-fill: rgb(255,0 ,0);" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="3">
+                                 <children>
+                                    <Label fx:id="editMeetingTimeLabel" text="Choose a time" />
+                                    <JFXTimePicker fx:id="editMeetingTime" defaultColor="#2f4563" editable="true" maxWidth="1.7976931348623157E308">
+                                       <padding>
+                                          <Insets bottom="5.0" right="5.0" />
+                                       </padding>
+                                    </JFXTimePicker>
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="4">
+                                 <children>
+                                    <Label fx:id="editMeetingDurationLabel" text="Meeting duration" />
+                                    <JFXTimePicker fx:id="editMeetingDuration" defaultColor="#304463" editable="true" maxWidth="1.7976931348623157E308" overLay="true">
+                                       <padding>
+                                          <Insets bottom="5.0" right="5.0" top="5.0" />
+                                       </padding>
+                                    </JFXTimePicker>
+                                 </children>
+                              </VBox>
+                              <GridPane GridPane.rowIndex="5">
+                                <columnConstraints>
+                                  <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                    <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                                </rowConstraints>
+                                 <children>
+                                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                                       <children>
+                                          <JFXCheckBox fx:id="editMeetingIsRecurring" text="This is a recurring meeting">
+                                             <padding>
+                                                <Insets right="5.0" />
+                                             </padding>
+                                          </JFXCheckBox>
+                                       </children>
+                                    </HBox>
+                                    <GridPane fx:id="editMeetingRecurrenceConf" disable="true" GridPane.rowIndex="1">
+                                       <columnConstraints>
+                                          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                                       </columnConstraints>
+                                       <rowConstraints>
+                                          <RowConstraints maxHeight="50.0" minHeight="30.0" vgrow="SOMETIMES" />
+                                          <RowConstraints maxHeight="50.0" minHeight="-Infinity" vgrow="SOMETIMES" />
+                                       </rowConstraints>
+                                       <children>
+                                          <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0">
+                                             <children>
+                                                <JFXComboBox id="editMeetingRecurrence" maxWidth="260.0" promptText="This meeting recurs" />
+                                             </children>
+                                          </VBox>
+                                          <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" GridPane.rowIndex="1">
+                                             <children>
+                                                <JFXRadioButton text="Every" HBox.hgrow="NEVER" />
+                                                <JFXTextField id="editMeetingRecurrenceDays" alignment="CENTER" maxWidth="40.0" />
+                                                <Label text="day(s)" />
+                                             </children>
+                                          </HBox>
+                                       </children>
+                                    </GridPane>
+                                 </children>
+                              </GridPane>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="2">
+                                 <children>
+                                    <Label fx:id="editMeetingLocationLabel" text="Meeting location" />
+                                    <JFXTextField fx:id="editMeetingLocation" maxWidth="250.0" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </GridPane>
+                        <GridPane GridPane.columnIndex="2">
+                          <columnConstraints>
+                            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="100.0" minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                          </rowConstraints>
+                           <children>
+                              <VBox prefHeight="200.0" prefWidth="100.0">
+                                 <children>
+                                    <JFXTextArea fx:id="editMeetingDescription" maxHeight="100.0" promptText="Enter meeting's description here" unFocusColor="#304463" />
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="1">
+                                 <children>
+                                    <VBox>
+                                       <children>
+                                          <Label fx:id="editMeetingAttendeesSearchLabel" text="Search for attendee" />
+                                          <JFXTextField fx:id="editMeetingAttendeesSearch" />
+                                       </children>
+                                    </VBox>
+                                    <StackPane prefHeight="150.0" prefWidth="200.0">
+                                       <children>
+                                          <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background-color: white;">
+                                             <StackPane.margin>
+                                                <Insets top="10.0" />
+                                             </StackPane.margin>
+                                             <content>
+                                                <FlowPane fx:id="editMeetingAttendeesList" prefHeight="200.0" prefWidth="200.0" />
+                                             </content>
+                                          </ScrollPane>
+                                       </children>
+                                    </StackPane>
+                                 </children>
+                              </VBox>
+                              <VBox prefHeight="200.0" prefWidth="100.0" GridPane.rowIndex="2">
+                                 <children>
+                                    <Label fx:id="editMeetingPriorityLabel" text="Meeting priority">
+                                       <VBox.margin>
+                                          <Insets bottom="10.0" />
+                                       </VBox.margin>
+                                    </Label>
+                                    <JFXComboBox fx:id="editMeetingPriority" maxWidth="1.7976931348623157E308" VBox.vgrow="ALWAYS" />
+                                 </children>
+                              </VBox>
+                           </children>
+                        </GridPane>
+                        <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" GridPane.columnSpan="3" GridPane.rowIndex="1">
+                           <children>
+                              <JFXButton fx:id="editMeetingCancel" minWidth="75.0" style="-fx-background-color: rgb(48, 68, 99);" text="Cancel" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets right="25.0" />
+                                 </HBox.margin>
+                              </JFXButton>
+                              <JFXButton fx:id="editMeetingSchedule" maxWidth="75.0" minWidth="70.0" style="-fx-background-color: rgb(48, 68, 99);" text="Schedule" textFill="WHITE">
+                                 <HBox.margin>
+                                    <Insets left="25.0" />
+                                 </HBox.margin>
+                              </JFXButton>
+                           </children>
+                        </HBox>
+                     </children>
+                  </GridPane>
+                  <VBox fx:id="editMeetingSuggestionVBox" disable="true" maxHeight="400.0" maxWidth="500.0" opacity="0.0" prefHeight="200.0" prefWidth="100.0" style="-fx-background-color: white;">
+                     <children>
+                        <GridPane>
+                          <columnConstraints>
+                            <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                          </columnConstraints>
+                          <rowConstraints>
+                            <RowConstraints maxHeight="80.0" minHeight="80.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                            <RowConstraints maxHeight="300.0" minHeight="280.0" prefHeight="30.0" vgrow="ALWAYS" />
+                            <RowConstraints maxHeight="50.0" minHeight="10.0" prefHeight="30.0" vgrow="ALWAYS" />
+                          </rowConstraints>
+                           <children>
+                              <VBox alignment="CENTER" maxHeight="80.0" prefHeight="200.0" prefWidth="100.0" style="-fx-background-color: rgb(48, 68, 99); -fx-border-width: 0 0 1 0; -fx-border-color: white;">
+                                 <children>
+                                    <Label text="Cannot schedule the meeting at your desired time" textFill="WHITE">
+                                       <font>
+                                          <Font name="Helvetica Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                    <Label alignment="CENTER" contentDisplay="CENTER" text="Please choose one of the available time slots and adjust the slider to select available time" textAlignment="CENTER" textFill="WHITE" wrapText="true">
+                                       <font>
+                                          <Font name="Helvetica Bold" size="13.0" />
+                                       </font>
+                                    </Label>
+                                 </children>
+                              </VBox>
+                              <Accordion fx:id="editMeetingSuggestionAccordion" style="-: white;" GridPane.rowIndex="1" />
+                              <JFXButton fx:id="editMeetingSuggestionListCancel" style="-fx-background-color: rgb(48,68,99);" text="Cancel" textFill="WHITE" GridPane.rowIndex="2" />
+                           </children>
+                        </GridPane>
+                     </children>
+                     <effect>
+                        <DropShadow />
+                     </effect>
+                  </VBox>
+               </children>
+            </StackPane>
+         </children>
+         <effect>
+            <DropShadow />
+         </effect>
+         <padding>
+            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+         </padding>
+      </VBox>
    </children>
 </StackPane>

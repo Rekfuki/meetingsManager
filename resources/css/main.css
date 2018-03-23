@@ -14,3 +14,23 @@
     -fx-text-fill: white;
 }
 
+.jfx-time-picker .input-line {
+    -fx-background-color: white;
+}
+.jfx-time-picker .input-focused-line {
+    -fx-background-color: white;
+}
+
+.jfx-time-picker > .arrow-button > .jfx-svg-glyph{
+    -fx-background-color: white;
+}
+
+.jfx-time-picker .jfx-text-field {
+    -jfx-unfocus-color: white;
+    -fx-text-fill: white;
+}
+
+.jfx-combo-box > .cell {
+    /*-fx-background-color: white;*/
+    -fx-text-fill: white;
+}

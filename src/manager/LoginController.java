@@ -47,7 +47,7 @@ public class LoginController {
         });
 
         validator = new RequiredFieldValidator();
-        validator.setMessage("USERNAME IS REQUIRED");
+        validator.setMessage("EMAIL IS REQUIRED");
         signUpUsername.getValidators().add(validator);
         signUpUsername.focusedProperty().addListener((o, oldVal, newVal) -> {
             if(!newVal) {
@@ -113,7 +113,7 @@ public class LoginController {
                     // TODO: 16/03/2018 load diary window and store employee id 
                 }
             } else {
-                signUpLabel.setText("USERNAME ALREADY EXISTS");
+                signUpLabel.setText("EMAIL ALREADY EXISTS");
                 signUpLabel.setStyle("-fx-text-fill: red");
             }
         }
@@ -123,7 +123,7 @@ public class LoginController {
     private void incorrect() {
         usernameField.setStyle("-jfx-unfocus-color: red");
         passwordField.setStyle("-jfx-unfocus-color: red");
-        loginLabel.setText("WRONG USERNAME OR PASSWORD");
+        loginLabel.setText("WRONG EMAIL OR PASSWORD");
         loginLabel.setStyle("-fx-text-fill: red");
         loginLabel.setOpacity(1.0);
     }

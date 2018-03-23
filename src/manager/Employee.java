@@ -4,9 +4,13 @@ public class Employee {
     private String name;
     private int id;
 
-    Employee(String name, int id) {
+
+    private String email;
+
+    Employee(String name, int id, String email) {
         this.name = name;
         this.id = id;
+        this.email = email;
     }
 
     public String getName() {
@@ -25,4 +29,11 @@ public class Employee {
         this.id = id;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

@@ -4,6 +4,7 @@ import org.sqlite.SQLiteConfig;
 
 import java.sql.*;
 import java.util.LinkedList;
+import java.util.StringJoiner;
 
 class Database {
 
@@ -16,8 +17,11 @@ class Database {
         disconnect();
     }
 
+//    public void finalize(){
+//        disconnect();
+//    }
+
     public void setup() {
-        connect();
         if(c == null) {
             return;
         }
@@ -34,11 +38,11 @@ class Database {
             System.out.println("Tables already exist");
         }
         System.out.println("Everything is in order");
-        disconnect();
     }
 
     private boolean createTables() {
         Statement stmt;
+        connect();
         try {
             stmt = c.createStatement();
             String sql = "create table employees " +
@@ -75,9 +79,15 @@ class Database {
                     "foreign key(task_id) references tasks(id))";
             stmt.executeUpdate(sql);
             stmt.close();
+
+            disconnect();
+
             return true;
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+
+            disconnect();
+
             return false;
         }
     }
@@ -92,14 +102,17 @@ class Database {
                 while(rs.next()) {
                     String tName = rs.getString("TABLE_NAME");
                     if(tName == null || !tName.equals(tables[i])) {
+                        disconnect();
                         return false;
                     }
                 }
             }
         } catch (SQLException e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            disconnect();
             return false;
         }
+        disconnect();
         return true;
     }
 
@@ -149,15 +162,15 @@ class Database {
     public Employee getEmployeeByID(int id) {
         connect();
         try {
-            System.out.println("Trying to get employee");
-            PreparedStatement stmt = c.prepareStatement("select id, name from employees where id=?");
+            PreparedStatement stmt = c.prepareStatement("select id, name, login from employees where id=?");
             stmt.setInt(1, id);
             ResultSet rs = stmt.executeQuery();
 
             if(rs.next()) {
                 Employee employee = new Employee(
                         rs.getString("name"),
-                        rs.getInt("id"));
+                        rs.getInt("id"),
+                        rs.getString("login"));
                 disconnect();
                 return employee;
             }
@@ -194,11 +207,13 @@ class Database {
             stmt.setString(2, username);
             stmt.setString(3, password);
             if(stmt.executeUpdate() > 0) {
+                disconnect();
                 return true;
             }
         } catch (Exception e){
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
+        disconnect();
         return false;
     }
 
@@ -222,6 +237,7 @@ class Database {
                         rs.getString("start"),
                         rs.getString("end"),
                         rs.getInt("organizer"),
+                        rs.getString("location"),
                         rs.getInt("priority")
                 );
                 events.add(event);
@@ -238,7 +254,7 @@ class Database {
         LinkedList<Employee> employees = new LinkedList<>();
         try {
             PreparedStatement stmt = c.prepareStatement(
-                    "select employees.id, employees.name from employees, employees_events " +
+                    "select employees.id, employees.name, employees.login from employees, employees_events " +
                             "where employees.id = employees_events.employee_id " +
                             "and employees_events.event_id = ?");
 
@@ -247,7 +263,8 @@ class Database {
             while(rs.next()) {
                 Employee employee = new Employee(
                         rs.getString("name"),
-                        rs.getInt("id")
+                        rs.getInt("id"),
+                        rs.getString("login")
                 );
                 employees.add(employee);
             }
@@ -258,10 +275,150 @@ class Database {
         return employees;
     }
 
+    private boolean updateEventAttendees(int eventId, LinkedList<Employee> attendees) {
+        try {
+            PreparedStatement stmt = c.prepareStatement("delete from employees_events where event_id = ?");
+
+            stmt.setInt(1, eventId);
+            stmt.executeUpdate();
+
+            stmt = c.prepareStatement("insert into employees_events(employee_id, event_id) values(? ,?)");
+
+            for(Employee e : attendees) {
+                stmt.setInt(1, e.getId());
+                stmt.setInt(2, eventId);
+                stmt.executeUpdate();
+            }
+            return true;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            return false;
+        }
+    }
+
+    public boolean updateEvent(Event event, LinkedList<Employee> attendees) {
+        connect();
+        try {
+            c.setAutoCommit(false);
+            PreparedStatement stmt = c.prepareStatement("update events set title = ?, description = ?, " +
+                    "start = ?, end = ?, organizer = ?, priority = ?, location = ? where id = ?");
+
+            stmt.setString(1, event.getTitle());
+            stmt.setString(2, event.getDesc());
+            stmt.setString(3, event.getStart().toInstant().toString());
+            stmt.setString(4, event.getEnd().toInstant().toString());
+            stmt.setInt(5, event.getOrganizer().getId());
+            stmt.setInt(6, event.getPriority());
+            stmt.setString(7,event.getLocation());
+            stmt.setInt(8, event.getId());
+
+            stmt.executeUpdate();
+
+            if(!updateEventAttendees(event.getId(), attendees)){
+                c.rollback();
+                disconnect();
+                return false;
+            }
+
+
+            c.commit();
+            c.setAutoCommit(false);
+
+            disconnect();
+
+            return true;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            try {
+                c.rollback();
+            } catch (SQLException ex) {
+                System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            }
+            disconnect();
+            return false;
+        }
+    }
+
+    public LinkedList<Event> getEmployeesEventsInRange(LinkedList<Employee> employees, String start, int id) {
+        connect();
+//        System.out.printf("start: %s\nend: %s\n", start, end);
+        StringJoiner joiner = new StringJoiner(", ");
+        for(Employee e : employees) {
+            joiner.add(String.format("%d", e.getId()));
+        }
+
+        String sql = String.format("select distinct ev.start, ev.end " +
+                "from events ev " +
+                "join employees_events ee on ee.event_id = ev.id " +
+                "where ee.employee_id in(%s) " +
+                "and ev.start like ? " +
+                "and ev.id != ?" +
+                "order by ev.start", joiner.toString());
+
+        LinkedList<Event> events = new LinkedList<>();
+        try {
+//            PreparedStatement stmt = c.prepareStatement("select ev.start, ev.end from events ev " +
+//                    "join employees_events ee on ee.event_id = ev.id where ee.employee_id in ("+joiner.toString()+") " +
+//                    "and ev.start >= ? and ev.end <= ? order by ev.start");
+
+            PreparedStatement stmt = c.prepareStatement(sql);
+            stmt.setString(1, start+"%");
+            stmt.setInt(2, id);
+            ResultSet rs = stmt.executeQuery();
+
+            while(rs.next()) {
+                events.add(new Event(
+                        rs.getString("start"),
+                        rs.getString("end")
+                ));
+            }
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return events;
+    }
+
+    public LinkedList<Employee> getEmployees() {
+        connect();
+        LinkedList<Employee> employees = new LinkedList<>();
+        try {
+            PreparedStatement stmt = c.prepareStatement("select id, name, login from employees");
+            ResultSet rs = stmt.executeQuery();
+            while(rs.next()) {
+                Employee e = new Employee(
+                        rs.getString("name"),
+                        rs.getInt("id"),
+                        rs.getString("login"));
+
+                employees.add(e);
+            }
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
+        return employees;
+    }
+
+    public boolean removeEmployeeFromEvent(int employeeId, int eventId) {
+        try {
+            System.out.println(employeeId);
+            System.out.println(eventId);
+            PreparedStatement stmt = c.prepareStatement("delete from employees_events " +
+                    "where employee_id = ? and event_id = ?");
+            stmt.setInt(1, employeeId);
+            stmt.setInt(2, eventId);
+            stmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
     public void createEmployee(String name, String login, String paswd){
         String sql = "INSERT INTO employees(name, login, paswd) VALUES(?,?,?)";
 
-        connect();
         try(PreparedStatement pstmt = c.prepareStatement(sql)){
             pstmt.setString(1, name);
             pstmt.setString(2, login);
@@ -270,14 +427,11 @@ class Database {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
-        disconnect();
     }
 
     public void createEvent(String title, String description, String start, String end){
         String sql = "INSERT INTO events(title, description, start, end) VALUES(?,?,?,?)";
 
-        connect();
         try(PreparedStatement pstmt = c.prepareStatement(sql)){
             pstmt.setString(1, title);
             pstmt.setString(2, description);
@@ -287,14 +441,11 @@ class Database {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
-        disconnect();
     }
 
     public void createTask(String title, String description, String deadline){
         String sql = "INSERT INTO tasks(title, description, deadline) VALUES(?,?,?)";
 
-        connect();
         try(PreparedStatement pstmt = c.prepareStatement(sql)){
             pstmt.setString(1, title);
             pstmt.setString(2, description);
@@ -303,7 +454,5 @@ class Database {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
-
-        disconnect();
     }
 }

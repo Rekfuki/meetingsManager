@@ -41,7 +41,7 @@
                     </rowConstraints>
                      <children>
                         <Label text="SIGN IN" />
-                        <JFXTextField fx:id="usernameField" alignment="CENTER" onAction="#attemptSignIn" promptText="Username" GridPane.rowIndex="2" />
+                        <JFXTextField fx:id="usernameField" alignment="CENTER" onAction="#attemptSignIn" promptText="Email" GridPane.rowIndex="2" />
                         <JFXPasswordField fx:id="passwordField" alignment="CENTER" onAction="#attemptSignIn" promptText="Password" GridPane.rowIndex="4" />
                         <Label fx:id="loginLabel" GridPane.rowIndex="5" />
                         <GridPane GridPane.rowIndex="6">
@@ -81,7 +81,7 @@
                      <children>
                         <Label text="SIGN UP" />
                         <JFXTextField fx:id="signUpName" alignment="CENTER" promptText="Name" GridPane.rowIndex="2" />
-                        <JFXTextField fx:id="signUpUsername" alignment="CENTER" promptText="Username" GridPane.rowIndex="4" />
+                        <JFXTextField fx:id="signUpUsername" alignment="CENTER" promptText="Email" GridPane.rowIndex="4" />
                         <JFXPasswordField fx:id="signUpPassword" alignment="CENTER" promptText="Password" GridPane.rowIndex="6" />
                         <Label fx:id="signUpLabel" GridPane.rowIndex="7" />
                         <GridPane GridPane.rowIndex="8">

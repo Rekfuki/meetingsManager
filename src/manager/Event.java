@@ -14,7 +14,7 @@ public class Event {
     private String location;
     private int priority;
 
-    Event(int eid, String etitle, String edesc, String estart, String eend, int eorg, int eprio) {
+    Event(int eid, String etitle, String edesc, String estart, String eend, int eorg, String eloc, int eprio) {
         this.id = eid;
         this.title = etitle;
         this.desc = edesc;
@@ -24,15 +24,26 @@ public class Event {
 
         try {
             this.start = sdf.parse(estart);
-            System.out.println(this.start);
             this.end = sdf.parse(eend);
-            System.out.println(this.end);
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
         }
 
         this.organizer = new Database().getEmployeeByID(eorg);
+        this.location = eloc;
         this.priority = eprio;
+    }
+    Event(String eStart, String eEnd) {
+        System.out.printf("\nEvent constructor start time: %s\nEvent constructor end time: %s\n", eStart, eEnd);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        try {
+            this.start = sdf.parse(eStart);
+            this.end = sdf.parse(eEnd);
+        } catch (Exception ex) {
+            System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
+            System.out.println("Failed to parse date in here");
+        }
     }
 
     public int getId() {
