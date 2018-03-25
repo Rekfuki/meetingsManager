@@ -11,13 +11,12 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 
 public class LoginController {
-    @FXML public AnchorPane rootPane;
+    @FXML public StackPane rootPane;
     @FXML public JFXButton signIn;
     @FXML public JFXButton signUp;
     @FXML public JFXTextField usernameField;
@@ -33,6 +32,7 @@ public class LoginController {
     @FXML public JFXPasswordField signUpPassword;
 
     private Database db = new Database();
+    private int employeeId;
 
 
     @FXML
@@ -76,7 +76,14 @@ public class LoginController {
                 Task<Parent> loadTask = new Task<Parent>() {
                     @Override
                     public Parent call() throws IOException {
-                        return (AnchorPane) FXMLLoader.load(getClass().getResource("/fxml/diary.fxml"));
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/diary.fxml"));
+                        DiaryController controller = new DiaryController(db.getEmployeeByID(employeeId));
+                        loader.setController(controller);
+
+                        return (StackPane) loader.load();
+
+
+//                        return (StackPane) FXMLLoader.load(getClass().getResource("/fxml/diary.fxml"));
                     }
                 };
                 loadTask.setOnSucceeded(e -> {
@@ -99,9 +106,8 @@ public class LoginController {
     private boolean signIn(){
         String username = usernameField.getText();
         String password = passwordField.getText();
-        int id = db.getEmployeeID(username, password);
-        Main.setCurrentEmployeeID(id);
-        return id != 0;
+        employeeId = db.getEmployeeID(username, password);
+        return employeeId != 0;
     }
 
     public void signUp(MouseEvent mouseEvent) {
@@ -131,6 +137,12 @@ public class LoginController {
     public void backToLogin(MouseEvent mouseEvent) {
         signUpPane.setDisable(true);
         signUpPane.setOpacity(0.0);
+        signUpLabel.setStyle(null);
+        signUpLabel.setText("");
+        signUpName.resetValidation();
+        signUpUsername.resetValidation();
+        signUpPassword.resetValidation();
+
         loginPane.setDisable(false);
         loginPane.setOpacity(1.0);
     }
@@ -138,6 +150,9 @@ public class LoginController {
     public void gotoSignUp(MouseEvent mouseEvent) {
         loginPane.setDisable(true);
         loginPane.setOpacity(0.0);
+        loginLabel.setStyle(null);
+        loginLabel.setOpacity(0);
+        loginLabel.setText("");
         signUpPane.setDisable(false);
         signUpPane.setOpacity(1.0);
     }

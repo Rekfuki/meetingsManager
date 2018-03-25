@@ -11,7 +11,7 @@
 
 .jfx-date-picker .jfx-text-field {
     -jfx-unfocus-color: rgb(48, 68, 99);
-    -fx-text-fill: white;
+    -fx-text-fill: rgb(48, 68, 99);;
 }
 
 .jfx-time-picker .input-line {
@@ -27,7 +27,7 @@
 
 .jfx-time-picker .jfx-text-field {
     -jfx-unfocus-color: white;
-    -fx-text-fill: white;
+    -fx-text-fill: rgb(48, 68, 99);;
 }
 
 .titled-pane
@@ -92,5 +92,13 @@
 
 .titled-pane:focused > .title > .arrow-button .arrow
 {
+    -fx-background-color: white;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: transparent;
+}
+
+.scroll-pane {
     -fx-background-color: white;
 }

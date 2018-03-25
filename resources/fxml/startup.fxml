@@ -4,15 +4,15 @@
 <?import com.jfoenix.controls.JFXPasswordField?>
 <?import com.jfoenix.controls.JFXTextField?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.StackPane?>
 
-<AnchorPane fx:id="rootPane" prefHeight="645.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="manager.LoginController">
+<StackPane fx:id="rootPane" prefHeight="645.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.141" xmlns:fx="http://javafx.com/fxml/1" fx:controller="manager.LoginController">
    <children>
-      <GridPane layoutX="192.0" layoutY="177.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <GridPane>
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -20,7 +20,7 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="300.0" minHeight="300.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
@@ -31,7 +31,7 @@
                       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -40,7 +40,11 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="SIGN IN" />
+                        <HBox alignment="CENTER" style="-fx-background-color: rgb(48, 68, 99);">
+                           <children>
+                              <Label text="SIGN IN" textFill="WHITE" />
+                           </children>
+                        </HBox>
                         <JFXTextField fx:id="usernameField" alignment="CENTER" onAction="#attemptSignIn" promptText="Email" GridPane.rowIndex="2" />
                         <JFXPasswordField fx:id="passwordField" alignment="CENTER" onAction="#attemptSignIn" promptText="Password" GridPane.rowIndex="4" />
                         <Label fx:id="loginLabel" GridPane.rowIndex="5" />
@@ -53,8 +57,8 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <JFXButton fx:id="signIn" onAction="#attemptSignIn" text="Sign In" />
-                              <JFXButton fx:id="gotoSignUp" onMouseClicked="#gotoSignUp" text="Sign Up" GridPane.columnIndex="1" />
+                              <JFXButton fx:id="signIn" maxWidth="67.0" onAction="#attemptSignIn" style="-fx-background-color: rgb(48, 68, 99);" text="Sign In" textFill="WHITE" />
+                              <JFXButton fx:id="gotoSignUp" onMouseClicked="#gotoSignUp" style="-fx-background-color: rgb(48, 68, 99);" text="Sign Up" textFill="WHITE" GridPane.columnIndex="1" />
                            </children>
                         </GridPane>
                      </children>
@@ -68,7 +72,7 @@
                       <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
                     </columnConstraints>
                     <rowConstraints>
-                      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                      <RowConstraints maxHeight="50.0" minHeight="50.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
@@ -79,7 +83,11 @@
                       <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                     </rowConstraints>
                      <children>
-                        <Label text="SIGN UP" />
+                        <HBox alignment="CENTER" style="-fx-background-color: rgb(48, 68, 99);">
+                           <children>
+                              <Label text="SIGN UP" textFill="WHITE" />
+                           </children>
+                        </HBox>
                         <JFXTextField fx:id="signUpName" alignment="CENTER" promptText="Name" GridPane.rowIndex="2" />
                         <JFXTextField fx:id="signUpUsername" alignment="CENTER" promptText="Email" GridPane.rowIndex="4" />
                         <JFXPasswordField fx:id="signUpPassword" alignment="CENTER" promptText="Password" GridPane.rowIndex="6" />
@@ -93,8 +101,8 @@
                             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                           </rowConstraints>
                            <children>
-                              <JFXButton fx:id="backButton" onMouseClicked="#backToLogin" text="BACK" />
-                              <JFXButton fx:id="signUp" onMouseClicked="#signUp" text="SIGN UP" GridPane.columnIndex="1" />
+                              <JFXButton fx:id="backButton" minWidth="71.0" onMouseClicked="#backToLogin" style="-fx-background-color: rgb(48, 68,99);" text="BACK" textFill="WHITE" />
+                              <JFXButton fx:id="signUp" onMouseClicked="#signUp" style="-fx-background-color: rgb(48, 68, 99);" text="SIGN UP" textFill="WHITE" GridPane.columnIndex="1" />
                            </children>
                         </GridPane>
                      </children>
@@ -104,4 +112,4 @@
          </children>
       </GridPane>
    </children>
-</AnchorPane>
+</StackPane>

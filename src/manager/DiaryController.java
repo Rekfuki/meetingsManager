@@ -1,7 +1,6 @@
 package manager;
 
 import com.jfoenix.controls.*;
-import com.sun.javafx.binding.StringFormatter;
 import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -10,11 +9,14 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -24,20 +26,24 @@ import javafx.util.Duration;
 import javafx.util.converter.LocalTimeStringConverter;
 import org.controlsfx.control.textfield.TextFields;
 
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
-public class DiaryController {
+//public class DiaryController {
+public class DiaryController  implements Initializable {
     @FXML public Label currentWeek;
-    @FXML public JFXButton decWeek;
-    @FXML public JFXButton incWeek;
     @FXML public JFXDatePicker datePicker;
-    @FXML public ColumnConstraints timeCol;
     @FXML public GridPane meetingsGrid;
     @FXML public StackPane rootDiaryPane;
     @FXML public GridPane columnHeads;
@@ -49,8 +55,6 @@ public class DiaryController {
     @FXML public JFXTimePicker editMeetingTime;
     @FXML public Label editMeetingDurationLabel;
     @FXML public JFXTimePicker editMeetingDuration;
-    @FXML public JFXCheckBox editMeetingIsRecurring;
-    @FXML public GridPane editMeetingRecurrenceConf;
     @FXML public VBox editMeetingVBox;
     @FXML public StackPane editMeetingRootPane;
     @FXML public JFXTextArea editMeetingDescription;
@@ -72,6 +76,7 @@ public class DiaryController {
     @FXML public Label meetingDetailsPriority;
     @FXML public Label meetingDetailsDescription;
     @FXML public Label meetingDetailsAttendees;
+    @FXML public JFXButton meetingDetailsDelete;
     @FXML public VBox meetingDetailsVBox;
     @FXML public GridPane meetingDetailsButtonsGrid;
     @FXML public VBox editMeetingSuggestionVBox;
@@ -80,33 +85,77 @@ public class DiaryController {
     @FXML public JFXTimePicker scheduleStart;
     @FXML public JFXTimePicker scheduleEnd;
     @FXML public JFXComboBox scheduleIntervals;
+    @FXML public JFXButton createNewEventButton;
+    @FXML public JFXButton eventListButton;
+    @FXML public JFXButton taskListButton;
+    @FXML public JFXButton eventListViewCloseButton;
+    @FXML public VBox eventListViewVBox;
+    @FXML public GridPane eventListViewListGrid;
+    @FXML public JFXButton taskListViewAdd;
+    @FXML public JFXButton taskListViewClose;
+    @FXML public VBox taskListViewVBox;
+    @FXML public GridPane taskListViewListGrid;
+    @FXML public JFXButton editTaskDelete;
+    @FXML public JFXTextArea editTaskDescription;
+    @FXML public JFXComboBox editTaskPriority;
+    @FXML public JFXButton editTaskCancel;
+    @FXML public JFXButton editTaskUpdate;
+    @FXML public VBox editTaskListVBox;
+    @FXML public JFXButton signOut;
+    @FXML public JFXButton searchPotentialClose;
+    @FXML public JFXDatePicker searchPotentialStartDate;
+    @FXML public JFXDatePicker searchPotentialEndDate;
+    @FXML public JFXTextField searchPotentialAttendees;
+    @FXML public FlowPane searchPotentialAttendeesList;
+    @FXML public Accordion searchPotentialAccordion;
+    @FXML public VBox searchPotentialVBox;
+    @FXML public JFXButton searchPotentialDates;
+    @FXML public Label searchPotentialStartDateLabel;
+    @FXML public Label searchPotentialEndDateLabel;
+    @FXML public Label searchPotentialAttendeesLabel;
+    @FXML public JFXButton searchPotentialSearch;
+    @FXML public Label searchPotentialDurationLabel;
+    @FXML public JFXTimePicker searchPotentialDuration;
+    @FXML public Label currentUserName;
+    @FXML public Label searchPotentialTimeTaken;
 
 
     private Calendar startTime = Calendar.getInstance(Locale.getDefault());
     private Calendar interval = Calendar.getInstance(Locale.getDefault());
     private Calendar currentDate = Calendar.getInstance(Locale.getDefault());
     private Database db = new Database();
-    private int employeeID = 1;
+    // TODO: 24/03/2018 remove before deploying 
+    private int currentEmployeeId = 1;
+    private Employee currentUser;
     private LinkedList<Event> events;
-    // TODO: 17/03/2018 possibly introduce a new class to store pane and event reference 
     private LinkedList<Event> displayedEvents = new LinkedList<>();
     private LinkedList<StackPane> panes = new LinkedList<>();
+    private LinkedList<Employee> eventAttendees = new LinkedList<>();
     private Node currentDayIndic;
     private int[] weekdayTranslate = {0, 7, 1, 2, 3, 4, 5, 6};
 
-    // TODO: 21/03/2018 add day start and day end
-    private Instant dayStart;
-    private Instant dayEnd;
+    private Calendar dayStart = Calendar.getInstance();
+    private Calendar dayEnd = Calendar.getInstance();
 
-    @FXML
-    void initialize() {
+//    public void initialize(URL location, ResourceBundle resources) {
+//
+//    }
+
+    DiaryController(Employee currentUser) {
+        this.currentUser = currentUser;
+    }
+
+    public void initialize(URL location, ResourceBundle resources) {
+
+//    public void initialize() {
         db.setup();
-        // TODO: 16/03/2018 change the way employeeID is stored and accessed on a top level
-
+//        currentUser = db.getEmployeeByID(currentEmployeeId);
         AnchorPane.setRightAnchor(rootDiaryPane, 0.0);
         AnchorPane.setBottomAnchor(rootDiaryPane, 0.0);
         AnchorPane.setLeftAnchor(rootDiaryPane, 0.0);
         AnchorPane.setTopAnchor(rootDiaryPane, 0.0);
+
+        currentUserName.setText(currentUser.getName());
 
         scheduleStart.setIs24HourView(true);
         scheduleStart.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
@@ -117,17 +166,21 @@ public class DiaryController {
                 DateTimeFormatter.ofPattern("HH:mm")));
         rootDiaryPane.getStylesheets().add(getClass().getResource("/css/main.css").toString());
         editMeetingRootPane.getStylesheets().add(getClass().getResource("/css/editMeetings.css").toString());
+        searchPotentialVBox.getStylesheets().add(getClass().getResource("/css/editMeetings.css").toString());
+
 
         scheduleIntervals.getItems().addAll(
                 FXCollections.observableArrayList("15 min", "30 min", "1 hour"));
-        scheduleIntervals.setValue("15 min");
+        scheduleIntervals.getSelectionModel().select(0);
+
+        editTaskPriority.getItems().addAll(FXCollections.observableArrayList("Low", "Medium", "High"));
+        editTaskPriority.getSelectionModel().select(0);
 
         scheduleStart.setValue(LocalTime.parse("08:00"));
         scheduleEnd.setValue(LocalTime.parse("20:00"));
 
-        dayStart = stringToInstant(scheduleStart.getValue().toString(), "HH:mm");
-        dayEnd = stringToInstant(scheduleEnd.getValue().toString(), "HH:mm");
-
+        dayStart = setDayStartEndCalendar("8:00", dayStart);
+        dayEnd = setDayStartEndCalendar("20:00", dayEnd);
 
         currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
         currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentDate.get(Calendar.DAY_OF_WEEK)]);
@@ -140,9 +193,31 @@ public class DiaryController {
         interval.set(Calendar.MINUTE, 15);
         interval.set(Calendar.HOUR_OF_DAY, 0);
 
+        signOut.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    javafx.concurrent.Task<Parent> loadTask = new javafx.concurrent.Task<Parent>() {
+                        @Override
+                        public Parent call() throws IOException {
+                            return (StackPane) FXMLLoader.load(getClass().getResource("/fxml/startup.fxml"));
+                        }
+                    };
+                    loadTask.setOnSucceeded(e -> {
+                        rootDiaryPane.getChildren().setAll(loadTask.getValue());
+                    });
 
-        // TODO: 21/03/2018 change event handler from focused to character  typed 
-        
+                    loadTask.setOnFailed(e -> loadTask.getException().printStackTrace());
+
+                    Thread thread = new Thread(loadTask);
+                    thread.start();
+
+                } catch (Exception e) {
+                    System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+                }
+            }
+        });
+
         editMeetingTitle.focusedProperty().addListener((o, oldVal, newVal) ->{
             System.out.println(editMeetingTitle.getText());
             if(!newVal) {
@@ -215,14 +290,46 @@ public class DiaryController {
             }
         });
 
-        editMeetingIsRecurring.selectedProperty().addListener(new ChangeListener<Boolean>() {
+        editMeetingCancel.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                System.out.println(editMeetingIsRecurring.isSelected());
-                if(editMeetingIsRecurring.isSelected()) {
-                    // TODO: 19/03/2018 Add recurrence support
+            public void handle(ActionEvent event) {
+                closePane(editMeetingVBox);
+                if(!editMeetingSuggestionVBox.isDisabled()){
+                    closePane(editMeetingSuggestionVBox);
+                }
+            }
+        });
+
+        searchPotentialStartDate.focusedProperty().addListener((o, oldVal, newVal) -> {
+            if(!newVal) {
+                if(searchPotentialStartDate.getValue() == null) {
+                    searchPotentialStartDateLabel.setStyle("-fx-text-fill: red");
                 } else {
-                    editMeetingSchedule.setDisable(false);
+                    searchPotentialStartDateLabel.setStyle(null);
+                }
+            }
+        });
+
+
+        searchPotentialEndDate.focusedProperty().addListener((o, oldVal, newVal) -> {
+            if(!newVal) {
+                if(searchPotentialEndDate.getValue() == null) {
+                    searchPotentialEndDateLabel.setStyle("-fx-text-fill: red");
+                } else {
+                    searchPotentialEndDateLabel.setStyle(null);
+                }
+            }
+        });
+
+        searchPotentialDuration.setIs24HourView(true);
+        searchPotentialDuration.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
+                DateTimeFormatter.ofPattern("HH:mm")));
+        searchPotentialDuration.focusedProperty().addListener((o, oldVal, newVal) -> {
+            if(!newVal) {
+                if(searchPotentialDuration.getValue() == null) {
+                    searchPotentialDurationLabel.setStyle("-fx-text-fill: red");
+                } else {
+                    searchPotentialDurationLabel.setStyle(null);
                 }
             }
         });
@@ -237,7 +344,7 @@ public class DiaryController {
         scheduleStart.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                dayStart = stringToInstant(scheduleStart.getValue().toString(), "HH:mm");
+                dayStart = setDayStartEndCalendar(scheduleStart.getValue().toString(), dayStart);
                 System.out.println(scheduleStart.getValue().toString());
             }
         });
@@ -245,73 +352,539 @@ public class DiaryController {
         scheduleEnd.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                dayEnd = stringToInstant(scheduleEnd.getValue().toString(), "HH:mm");
+                dayEnd = setDayStartEndCalendar(scheduleEnd.getValue().toString(), dayEnd);
             }
         });
 
-        System.out.println(Locale.getDefault() + ": " + startTime.getFirstDayOfWeek());
-        updateTimeInterval();
-        displayMeetings();
-
-    }
-
-    private Instant stringToInstant(String time, String pattern) {
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-            return sdf.parse(time).toInstant();
-        } catch (Exception e) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-        }
-        return null;
-    }
-
-    private void constructEditEventDialog(Event e) {
-        editMeetingAttendeesList.getChildren().clear();
-
-        FadeTransition fadeTransition = new FadeTransition();
-        fadeTransition.setDuration(Duration.millis(100));
-        fadeTransition.setNode(editMeetingVBox);
-        fadeTransition.setFromValue(0);
-        fadeTransition.setToValue(1);
-        fadeTransition.play();
-
-        editMeetingVBox.setDisable(false);
-        editMeetingVBox.setOpacity(1.0);
-        editMeetingVBox.setStyle("-fx-background-color: rgb(255, 255, 255, 1)");
-
-        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+        createNewEventButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
-            public void handle(MouseEvent event) {
-                if(!inHierarchy(event.getPickResult().getIntersectedNode(), editMeetingVBox) &&
-                        !editMeetingVBox.isDisabled()) {
-                    meetingsGrid.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
+            public void handle(ActionEvent event) {
+                if(editMeetingVBox.isDisabled()) {
+                    Event e = new Event();
+                    e.setId(0);
+                    e.setOrganizer(currentUser);
+                    constructEditEventDialog(e);
+                } else {
                     closePane(editMeetingVBox);
+                    closePane(editMeetingSuggestionVBox);
                 }
             }
-        };
-        meetingsGrid.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+        });
 
+        eventListButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(eventListViewVBox.isDisabled()){
+                    constructEventListView();
+                } else {
+                    closePane(eventListViewVBox);
+                }
+            }
+        });
 
-        editMeetingTitle.setText(e.getTitle());
-        editMeetingDate.setValue(e.getStart().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
-        editMeetingLocation.setText(e.getLocation());
-        editMeetingTime.setValue(LocalDateTime.ofInstant(
-                e.getStart().toInstant(), ZoneId.systemDefault()).toLocalTime());
+        eventListViewCloseButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                closePane(eventListViewVBox);
+            }
+        });
 
-        long duration = (e.getEnd().getTime() - e.getStart().getTime());
-//        LocalTime.
-//        LocalDateTime convertedDur = LocalDateTime.ofInstant(Instant.ofEpochMilli(duration), ZoneId.systemDefault());
-        editMeetingDuration.setValue(LocalTime.from(Instant.ofEpochMilli(duration).atZone(ZoneId.of("UTC"))));
+        taskListButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(taskListViewVBox.isDisabled()) {
+                    constructTaskListView();
+                } else {
+                    closePane(taskListViewVBox);
+                }
+            }
+        });
 
-        // TODO: 19/03/2018 do recurrence here
+        taskListViewClose.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                closePane(taskListViewVBox);
+            }
+        });
 
-        editMeetingPriority.getSelectionModel().select(e.getPriority());
+        taskListViewAdd.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(editTaskListVBox.isDisabled()) {
+                    constructEditTaskView(new Task("", 0));
+                }
+            }
+        });
 
-        editMeetingDescription.setText(e.getDesc());
+        editTaskCancel.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                closePane(editTaskListVBox);
+            }
+        });
+
+        searchPotentialDates.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(searchPotentialVBox.isDisabled()) {
+                    constructSearchPane();
+                } else {
+                    closePane(searchPotentialVBox);
+                }
+            }
+        });
+
+        searchPotentialClose.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                closePane(searchPotentialVBox);
+            }
+        });
+
+        updateTimeInterval();
+        displayMeetings();
+    }
+
+    private Calendar setDayStartEndCalendar(String t, Calendar c) {
+        String time[] = t.split(":");
+        int h = Integer.parseInt(time[0]);
+        int m = Integer.parseInt(time[1]);
+
+        c.set(Calendar.HOUR_OF_DAY, h);
+        c.set(Calendar.MINUTE, m);
+        c.set(Calendar.SECOND, 0);
+
+        return c;
+    }
+
+    private void resetSearchPane() {
+        searchPotentialStartDate.setValue(null);
+        searchPotentialEndDate.setValue(null);
+        searchPotentialDuration.setValue(null);
+        searchPotentialAttendees.clear();
+        searchPotentialAttendeesList.getChildren().clear();
+        searchPotentialAccordion.getPanes().clear();
+
+        searchPotentialStartDateLabel.setStyle(null);
+        searchPotentialEndDateLabel.setStyle(null);
+        searchPotentialDurationLabel.setStyle(null);
+        searchPotentialAttendeesLabel.setStyle(null);
+        searchPotentialTimeTaken.setText("");
+    }
+
+    private void constructSearchPane() {
+        resetSearchPane();
+        showPane(searchPotentialVBox);
+        eventAttendees.clear();
 
         LinkedList<Employee> employees = db.getEmployees();
         ArrayList<String> tmp = new ArrayList<>();
-        for(Employee tmpEmp : employees) {
+        for (Employee tmpEmp : employees) {
+            StringJoiner joiner = new StringJoiner(", ");
+            joiner.add(tmpEmp.getName());
+            joiner.add(String.format("%s", tmpEmp.getEmail()));
+            tmp.add(joiner.toString());
+        }
+
+        TextFields.bindAutoCompletion(searchPotentialAttendees, tmp);
+
+
+        searchPotentialAttendees.setOnKeyPressed(new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if(event.getCode() == KeyCode.ENTER) {
+                    searchPotentialAttendeesLabel.setStyle(null);
+                    String user[] = searchPotentialAttendees.getText().split(", ");
+                    boolean contains = false;
+                    for(Employee emp : eventAttendees) {
+                        if(user.length > 0) {
+                            if(emp.getEmail().equals(user[1])) {
+                                contains = true;
+                                searchPotentialAttendeesLabel.setStyle("-fx-text-fill: red");
+                                break;
+                            }
+                        }
+                    }
+                    if(!contains) {
+                        for(Employee emp : employees) {
+                            if(user.length > 0) {
+                                if (emp.getEmail().equals(user[1])) {
+                                    searchPotentialAttendeesLabel.setStyle(null);
+                                    eventAttendees.add(emp);
+                                    searchPotentialAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
+                                    searchPotentialAttendees.setText("");
+                                }
+                            }
+                        }
+                    }
+                }
+                else {
+                    searchPotentialAttendeesLabel.setStyle(null);
+                }
+            }
+        });
+
+        searchPotentialSearch.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(validateForSearch(eventAttendees)) {
+                    try {
+                        long startSearchTime = System.nanoTime();
+                        System.out.println("Validation passed");
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+                        Calendar start = Calendar.getInstance();
+                        start.setTime(sdf.parse(searchPotentialStartDate.getValue().toString()));
+
+                        Calendar end = Calendar.getInstance();
+                        end.setTime(sdf.parse(searchPotentialEndDate.getValue().toString()));
+
+                        String time[] = searchPotentialDuration.getValue().toString().split(":");
+                        long duration = (Integer.parseInt(time[0]) * 60 + Integer.parseInt(time[1])) * 60000;
+
+
+                        LinkedList<Event> allAvailableSlots = new LinkedList<>();
+                        for(; start.getTime().compareTo(end.getTime()) <= 0;
+                            start.add(Calendar.DAY_OF_YEAR, 1)) {
+
+                            LinkedList<Event> open = getOpenSlots(start, duration, 0);
+                            allAvailableSlots.addAll(open);
+                        }
+                        long timeTaken = (System.nanoTime() - startSearchTime) / 1000000;
+//                        ObservableList<String> list = FXCollections.observableArrayList();
+                        searchPotentialAccordion.getPanes().clear();
+
+                        if(allAvailableSlots.size() == 0) {
+                            TitledPane tp = new TitledPane();
+                            tp.setText("The meeting cannot be scheduled today, please try another day");
+                            searchPotentialAccordion.getPanes().add(tp);
+                        } else {
+                            allAvailableSlots.forEach((v) -> {
+                                Instant upperBound = Instant.ofEpochMilli(v.getEnd().getTime() - duration);
+                                searchPotentialAccordion.getPanes().add(createTitledPane(v.getStart().toInstant(), upperBound));
+//                                list.add(v.getStart().toString());
+                            });
+//                            editMeetingSuggestionVBox.setDisable(false);
+//                            editMeetingSuggestionVBox.setOpacity(1.0);
+                        }
+                        allAvailableSlots.forEach((v) -> {
+                            System.out.printf("\nOpen: %s - %s", v.getStart(), v.getEnd());
+
+
+                        });
+
+                        searchPotentialTimeTaken.setText(String.format("%d slots in %d ms",
+                                searchPotentialAccordion.getPanes().size(), timeTaken));
+
+                    } catch (Exception e) {
+                        System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+                    }
+                }
+            }
+        });
+    }
+
+    private boolean validateForSearch(LinkedList<Employee> employees) {
+        boolean valid = true;
+        if(searchPotentialStartDate.getValue() == null) {
+            searchPotentialStartDateLabel.setStyle("-fx-text-fill: red");
+            valid = false;
+        }
+
+        if(searchPotentialEndDate.getValue() == null) {
+            searchPotentialEndDateLabel.setStyle("-fx-text-fill: red");
+            valid = false;
+        }
+
+        if(searchPotentialDuration.getValue() == null) {
+            searchPotentialDurationLabel.setStyle("-fx-text-fill: red");
+            valid = false;
+        }
+
+        if(employees.size() == 0) {
+            searchPotentialAttendeesLabel.setStyle("-fx-text-fill: red");
+            valid = false;
+        }
+
+        return valid;
+    }
+
+    private void constructEditTaskView(Task t) {
+        showPane(editTaskListVBox);
+        editTaskDelete.setDisable(true);
+        editTaskDelete.setOpacity(0);
+
+        editTaskDescription.clear();
+        editTaskPriority.getSelectionModel().select(0);
+        if(t.getId() > 0) {
+            editTaskDescription.setText(t.getDescription());
+            editTaskPriority.getSelectionModel().select(t.getPriority());
+            editTaskDelete.setDisable(false);
+            editTaskDelete.setOpacity(1);
+        }
+
+        editTaskUpdate.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+
+                int priority = editTaskPriority.getSelectionModel().getSelectedIndex();
+                if(t.getId() > 0) {
+                    Task task = new Task(t.getId(), editTaskDescription.getText(), priority);
+                    if(!db.updateTask(task)) {
+                        System.out.println("Failed to update task");
+                    }
+                } else {
+                    Task task = new Task(editTaskDescription.getText(), priority);
+                    if(!db.createTask(currentUser.getId(), task)) {
+                        System.out.println("Failed to update task");
+                    }
+                }
+                closePane(editTaskListVBox);
+                populateTaskListView();
+            }
+        });
+
+        editTaskDelete.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(!db.deleteTask(t.getId())) {
+                    System.out.println("Failed to delete task");
+                }
+                populateTaskListView();
+                closePane(editTaskListVBox);
+            }
+        });
+    }
+
+    private void constructTaskListView() {
+        showPane(taskListViewVBox);
+        populateTaskListView();
+    }
+
+    private void populateTaskListView() {
+        taskListViewListGrid.getChildren().clear();
+        LinkedList<Task> tasks = db.getEmployeeTasks(currentUser.getId());
+        System.out.printf("Tasks: %d", tasks.size());
+
+        for(Task t : tasks) {
+           insertNewMeeting(t);
+        }
+    }
+
+    private void insertNewMeeting(Task t) {
+        Integer rows = 0;
+        try {
+            Method method = taskListViewListGrid.getClass().getDeclaredMethod("getNumberOfRows");
+            method.setAccessible(true);
+            rows = (Integer) method.invoke(taskListViewListGrid);
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+
+        GridPane gridPane = new GridPane();
+
+        HBox hBox = createTaskListViewColumn(t.getDescription());
+        hBox.setMinWidth(900);
+        hBox.setMaxWidth(900);
+
+        gridPane.add(hBox, 0, 0);
+
+        String priorities[] = {"Low", "Medium", "High"};
+
+        hBox = createTaskListViewColumn(priorities[t.getPriority()]);
+        hBox.setMinWidth(100);
+        hBox.setMaxWidth(100);
+        hBox.setAlignment(Pos.CENTER);
+        gridPane.add(hBox, 1, 0);
+
+        VBox vBox = new VBox(gridPane);
+
+        String colors[] = getPriorityColours(t.getPriority());
+
+        vBox.setStyle(colors[0]);
+
+        vBox.setOnMouseClicked(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                if(editTaskListVBox.isDisabled()) {
+                    constructEditTaskView(t);
+                }
+            }
+        });
+
+        vBox.setOnMouseEntered(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                vBox.setStyle("-fx-border-color: blue"+colors[0]);
+            }
+        });
+
+        vBox.setOnMouseExited(new EventHandler<MouseEvent>() {
+            @Override
+            public void handle(MouseEvent event) {
+                vBox.setStyle(colors[0]);
+            }
+        });
+
+
+        taskListViewListGrid.add(vBox, 0, rows, 3, 1);
+    }
+
+    private HBox createTaskListViewColumn(String data) {
+        Label label = new Label(data);
+        HBox.setMargin(label, new Insets(0, 10, 0, 10));
+        HBox hBox = new HBox(label);
+        HBox.setMargin(hBox, new Insets(0, 10, 0, 10));
+        hBox.setMinHeight(25);
+
+        return hBox;
+    }
+
+    private void constructEventListView() {
+        showPane(eventListViewVBox);
+
+        populateEventListView();
+    }
+
+    private void populateEventListView() {
+        eventListViewListGrid.getChildren().clear();
+        String priority[] = {"Low", "Medium", "High"};
+
+        for(int i = 0; i < events.size(); i++) {
+            Event e = events.get(i);
+            GridPane gridPane = new GridPane();
+            VBox vbox = new VBox(gridPane);
+
+            gridPane.add(createListViewColumn(e.getTitle()), 0, i);
+            gridPane.add(createListViewColumn(e.getDesc()), 1, i);
+            gridPane.add(createListViewColumn(e.getStart().toString()), 2, i);
+            gridPane.add(createListViewColumn(e.getEnd().toString()), 3, i);
+            gridPane.add(createListViewColumn(e.getOrganizer().getName()), 4, i);
+            gridPane.add(createListViewColumn(e.getLocation()), 5, i);
+            gridPane.add(createListViewColumn(priority[e.getPriority()]), 6, i);
+
+            String colors[] = getPriorityColours(e.getPriority());
+
+            vbox.setStyle(colors[0]);
+            vbox.setMinHeight(25);
+
+            vbox.setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if(meetingDetailsVBox.isDisabled()) {
+                        constructDetailedMeetingDialog(e);
+                    }
+                }
+            });
+
+            vbox.setOnMouseEntered(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    vbox.setStyle("-fx-border-color: blue"+colors[0]);
+                }
+            });
+
+            vbox.setOnMouseExited(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    vbox.setStyle(colors[0]);
+                }
+            });
+
+            eventListViewListGrid.add(vbox, 0, i, 8, 1);
+        }
+        RowConstraints rc = new RowConstraints();
+        rc.setValignment(VPos.CENTER);
+        eventListViewListGrid.getRowConstraints().add(rc);
+    }
+
+    private HBox createListViewColumn(String data) {
+        Label label = new Label(data);
+        HBox.setMargin(label, new Insets(0, 10, 0, 10));
+        HBox hbox = new HBox(label);
+        hbox.setMinWidth(143);
+        hbox.setMaxWidth(143);
+        hbox.setAlignment(Pos.CENTER);
+
+        return hbox;
+    }
+
+    private void clearEditEventDialogFields(){
+        editMeetingTitle.clear();
+        editMeetingDate.setValue(null);
+        editMeetingLocation.clear();
+        editMeetingTime.setValue(null);
+        editMeetingDuration.setValue(null);
+        editMeetingDescription.clear();
+        editMeetingAttendeesSearch.clear();
+        editMeetingAttendeesList.getChildren().clear();
+        editMeetingPriority.getSelectionModel().select(0);
+
+        editMeetingTitleLabel.setStyle(null);
+        editMeetingDateLabel.setStyle(null);
+        editMeetingLocationLabel.setStyle(null);
+        editMeetingTimeLabel.setStyle(null);
+        editMeetingDurationLabel.setStyle(null);
+        editMeetingPriorityLabel.setStyle(null);
+        editMeetingAttendeesSearchLabel.setStyle(null);
+    }
+
+    private void constructEditEventDialog(Event e) {
+        showPane(editMeetingVBox);
+
+//        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                if(!inHierarchy(event.getPickResult().getIntersectedNode(), editMeetingVBox) &&
+//                        !editMeetingVBox.isDisabled()) {
+//                    meetingsGrid.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
+//                    closePane(editMeetingVBox);
+//                }
+//            }
+//        };
+//        meetingsGrid.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
+
+        LinkedList<Employee> employees = db.getEmployees();
+
+        if (e.getId() > 0) {
+            clearEditEventDialogFields();
+            editMeetingTitle.setText(e.getTitle());
+            editMeetingDate.setValue(e.getStart().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            editMeetingLocation.setText(e.getLocation());
+            editMeetingTime.setValue(LocalDateTime.ofInstant(
+                    e.getStart().toInstant(), ZoneId.systemDefault()).toLocalTime());
+
+            long duration = (e.getEnd().getTime() - e.getStart().getTime());
+            editMeetingDuration.setValue(LocalTime.from(Instant.ofEpochMilli(duration).atZone(ZoneId.of("UTC"))));
+
+            editMeetingPriority.getSelectionModel().select(e.getPriority());
+
+            editMeetingDescription.setText(e.getDesc());
+
+            eventAttendees = db.getEventAttendees(e.getId());
+
+        } else if(e.getId() == 0){
+            clearEditEventDialogFields();
+            eventAttendees.clear();
+            eventAttendees.add(currentUser);
+        } else {
+            boolean isInTheList = false;
+            for(Employee tmp : eventAttendees) {
+                if(tmp.getEmail().equals(currentUser.getEmail())) {
+                    isInTheList = true;
+                    break;
+                }
+            }
+            if(!isInTheList) {
+                System.out.println("user is not in the list");
+                eventAttendees.add(currentUser);
+            }
+        }
+
+
+
+        ArrayList<String> tmp = new ArrayList<>();
+        for (Employee tmpEmp : employees) {
             StringJoiner joiner = new StringJoiner(", ");
             joiner.add(tmpEmp.getName());
             joiner.add(String.format("%s", tmpEmp.getEmail()));
@@ -319,9 +892,6 @@ public class DiaryController {
         }
 
         TextFields.bindAutoCompletion(editMeetingAttendeesSearch, tmp);
-
-
-        LinkedList<Employee> eventAttendees = db.getEventAttendees(e.getId());
 
         editMeetingAttendeesSearch.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
@@ -331,19 +901,23 @@ public class DiaryController {
                     String user[] = editMeetingAttendeesSearch.getText().split(", ");
                     boolean contains = false;
                     for(Employee emp : eventAttendees) {
-                        if(user.length > 0 && emp.getEmail().equals(user[1])) {
-                            contains = true;
-                            editMeetingAttendeesSearchLabel.setStyle("-fx-text-fill: red");
-                            break;
+                        if(user.length > 0){
+                            if(emp.getEmail().equals(user[1])) {
+                                contains = true;
+                                editMeetingAttendeesSearchLabel.setStyle("-fx-text-fill: red");
+                                break;
+                            }
                         }
                     }
                     if(!contains) {
                         for(Employee emp : employees) {
-                            if(emp.getEmail().equals(user[1])) {
-                                editMeetingAttendeesSearchLabel.setStyle(null);
-                                eventAttendees.add(emp);
-                                editMeetingAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
-                                editMeetingAttendeesSearch.setText("");
+                            if(user.length > 0) {
+                                if (emp.getEmail().equals(user[1])) {
+                                    editMeetingAttendeesSearchLabel.setStyle(null);
+                                    eventAttendees.add(emp);
+                                    editMeetingAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
+                                    editMeetingAttendeesSearch.setText("");
+                                }
                             }
                         }
                     }
@@ -358,113 +932,59 @@ public class DiaryController {
             editMeetingAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
         }
 
-        EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                editMeetingCancel.setOnAction(null);
-                closePane(editMeetingVBox);
-            }
-        };
-        editMeetingCancel.setOnAction(cancelEvent);
+//        EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent event) {
+//                editMeetingCancel.setOnAction(null);
+//                closePane(editMeetingVBox);
+//                closePane(editMeetingSuggestionVBox);
+//            }
+//        };
+//        editMeetingCancel.setOnAction(cancelEvent);
 
         editMeetingSchedule.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 if(validateForSchedule(eventAttendees)) {
-                    // TODO: 21/03/2018 check if event only has one person and that person is the organizer
                     try {
-                        Calendar start = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+                        Calendar start = Calendar.getInstance();
                         start.setTime(sdf.parse(editMeetingDate.getValue().toString()));
 
-                        String time[] = editMeetingTime.getValue().toString().split(":");
-                        int hours = Integer.parseInt(time[0]);
-                        int minutes = Integer.parseInt(time[1]);
+                        String time[] = editMeetingDuration.getValue().toString().split(":");
+                        int h = Integer.parseInt(time[0]);
+                        int m = Integer.parseInt(time[1]);
 
-                        start.add(Calendar.HOUR_OF_DAY, hours);
-                        start.add(Calendar.MINUTE, minutes);
+                        long newDuration = (h * 60 + m) * 60000;
 
+//                        Calendar end = (Calendar) start.clone();
+//                        end.add(Calendar.HOUR_OF_DAY, h);
+//                        end.add(Calendar.MINUTE, m);
+
+                        Calendar eventStart = Calendar.getInstance();
+                        eventStart.setTime(sdf.parse(editMeetingDate.getValue().toString()));
+                        time = editMeetingTime.getValue().toString().split(":");
+                        h = Integer.parseInt(time[0]);
+                        m = Integer.parseInt(time[1]);
+                        eventStart.set(Calendar.HOUR_OF_DAY, h);
+                        eventStart.set(Calendar.MINUTE, m);
+
+                        Calendar eventEnd = (Calendar) eventStart.clone();
                         time = editMeetingDuration.getValue().toString().split(":");
-                        hours = Integer.parseInt(time[0]);
-                        minutes = Integer.parseInt(time[1]);
+                        h = Integer.parseInt(time[0]);
+                        m = Integer.parseInt(time[1]);
+                        eventEnd.add(Calendar.HOUR_OF_DAY, h);
+                        eventEnd.add(Calendar.MINUTE, m);
 
-                        Calendar end = (Calendar) start.clone();
-                        end.add(Calendar.HOUR_OF_DAY, hours);
-                        end.add(Calendar.MINUTE, minutes);
-
-                        Long newDuration = end.getTimeInMillis() - start.getTimeInMillis();
-                        Calendar newDayStart = (Calendar) start.clone();
-                        newDayStart.set(Calendar.HOUR_OF_DAY, ((int)dayStart.toEpochMilli() / 3600000) + 1);
-                        newDayStart.set(Calendar.MINUTE, (int)(dayStart.toEpochMilli() % 3600000 / 60000));
-
-                        Calendar newDayEnd = (Calendar) end.clone();
-                        newDayEnd.set(Calendar.HOUR_OF_DAY, ((int)dayEnd.toEpochMilli() / 3600000) + 1);
-                        newDayEnd.set(Calendar.MINUTE, (int)dayEnd.toEpochMilli() % 3600000 / 60000);
-
-                        System.out.printf("\nnew start date: %s\nnew day end: %s\n", newDayStart.getTime(), newDayEnd.getTime());
-
-
-                        LinkedList<Event> events = db.getEmployeesEventsInRange(eventAttendees,
-                                editMeetingDate.getValue().toString(), e.getId());
-
-
-
-                        events.forEach((v) -> {
-                            System.out.printf("\nEvents: %s - %s", v.getStart().toString(), v.getEnd().toString());
-                        });
-                        LinkedList<Event> busy = new LinkedList<>();
-                        LinkedList<Event> open = new LinkedList<>();
-
-                        System.out.printf("\nEvents size: %d\n", events.size());
-
-                        if(events.size()  == 0) {
-                            open.add(new Event(newDayStart.toInstant().toString(), newDayEnd.toInstant().toString()));
-                        } else {
-                            Event ev = events.get(0);
-                            for (int i = 1; i < events.size(); i++) {
-                                int value = events.get(i).getStart().compareTo(ev.getEnd());
-
-                                if (value <= 0) {
-                                    ev.setEnd(events.get(i).getEnd());
-                                } else {
-                                    busy.add(ev);
-                                    ev = events.get(i);
-                                }
-                            }
-                            busy.add(ev);
-
-
-                            for (int i = 0; i < busy.size(); i++) {
-                                if(i == 0) {
-                                    if(busy.get(i).getStart().getTime() - newDayStart.getTimeInMillis() >= newDuration) {
-                                        open.add(new Event(newDayStart.toInstant().toString(), busy.get(i).getStart().toInstant().toString()));
-                                    }
-                                } else if(i == busy.size() - 1) {
-                                    if(newDayEnd.getTimeInMillis() - busy.get(i).getEnd().getTime() >= newDuration) {
-                                        open.add(new Event(busy.get(i).getEnd().toInstant().toString(), newDayEnd.toInstant().toString()));
-                                    }
-                                } else {
-                                    if(busy.get(i).getStart().getTime() - busy.get(i-1).getEnd().getTime() >= newDuration) {
-                                        open.add(new Event(busy.get(i-1).getEnd().toInstant().toString(),
-                                                busy.get(i).getStart().toInstant().toString()));
-                                    }
-                                }
-                            }
-                        }
-                        busy.forEach((v) -> {
-                            System.out.printf("\nBusy: %s - %s", v.getStart().toString(), v.getEnd().toString());
-                        });
-//
-                        open.forEach((v) -> {
-                            System.out.printf("\nOpen: %s - %s", v.getStart().toString(), v.getEnd().toString());
-                        });
+                        LinkedList<Event> open = getOpenSlots(start, newDuration, e.getId());
 
                         boolean fits = false;
                         for (Event tmpE : open) {
                             System.out.printf("\nOpen slot start: %s\nOpen slot end: %s\n", tmpE.getStart().toString(), tmpE.getEnd().toString());;
-                            System.out.printf("\nEvent slot start: %s\nEvent slot end: %s\n", start.getTime(), end.getTime());
-                            if(tmpE.getStart().compareTo(start.getTime()) <= 0 &&
-                                    tmpE.getEnd().compareTo(end.getTime()) >= 0) {
+                            System.out.printf("\nEvent slot start: %s\nEvent slot end: %s\n", eventStart.getTime(), eventEnd.getTime());
+                            if(tmpE.getStart().compareTo(eventStart.getTime()) <= 0 &&
+                                    tmpE.getEnd().compareTo(eventEnd.getTime()) >= 0) {
                                 System.out.println("time slot fits");
                                 fits = true;
                             } else {
@@ -476,24 +996,32 @@ public class DiaryController {
                             System.out.println("you can schedule the meeting in the wanted time frame");
                             // TODO: 22/03/2018 add alert if tx fails
                             Event tmpEvent = new Event(e.getId(), editMeetingTitle.getText(),
-                                    editMeetingDescription.getText(), start.getTime().toInstant().toString(),
-                                    end.getTime().toInstant().toString(), e.getOrganizer().getId(),
+                                    editMeetingDescription.getText(), eventStart.getTime().toInstant().toString(),
+                                    eventEnd.getTime().toInstant().toString(), e.getOrganizer().getId(),
                                     editMeetingLocation.getText(),
                                     editMeetingPriority.getSelectionModel().getSelectedIndex());
+//                            }
+
+                            if(tmpEvent.getId() <= 0) {
+                                if(db.createEvent(tmpEvent, eventAttendees)){
+                                    System.out.println("event created");
                                     closePane(editMeetingVBox);
-
-                            if(db.updateEvent(tmpEvent, eventAttendees)) {
-                                System.out.println("event updated");
-                                displayMeetings();
+                                    displayMeetings();
+                                    populateEventListView();
+                                }
+                            } else {
+                                if(db.updateEvent(tmpEvent, eventAttendees)) {
+                                    System.out.println("event updated");
+                                    closePane(editMeetingVBox);
+                                    displayMeetings();
+                                    populateEventListView();
+                                } else {
+                                    System.out.println("Failed to update meeting");
+                                }
                             }
-
-//                            Event(int eid, String etitle, String edesc, String estart, String eend, int eorg, String eloc, int eprio) {
-
                         } else {
-                            // TODO: 22/03/2018 inform user if meeting cannot be scheduled today
-                            System.out.printf("%s", Instant.ofEpochMilli(newDuration).toString());
                             System.out.println("you cannot schedule the meeting in the wanted time frame");
-                            ObservableList<String> list = FXCollections.observableArrayList();
+//                            ObservableList<String> list = FXCollections.observableArrayList();
                             editMeetingSuggestionAccordion.getPanes().clear();
 
                             if(open.size() == 0) {
@@ -504,10 +1032,11 @@ public class DiaryController {
                                 open.forEach((v) -> {
                                     Instant upperBound = Instant.ofEpochMilli(v.getEnd().getTime() - newDuration);
                                     editMeetingSuggestionAccordion.getPanes().add(createTitledPane(v.getStart().toInstant(), upperBound));
-                                    list.add(v.getStart().toString());
+//                                    list.add(v.getStart().toString());
                                 });
-                                editMeetingSuggestionVBox.setDisable(false);
-                                editMeetingSuggestionVBox.setOpacity(1.0);
+                                showPane(editMeetingSuggestionVBox);
+//                                editMeetingSuggestionVBox.setDisable(false);
+//                                editMeetingSuggestionVBox.setOpacity(1.0);
                             }
                         }
 
@@ -519,11 +1048,96 @@ public class DiaryController {
         });
     }
 
+    private void populateEditMeetingAttendeeList() {
+        editMeetingAttendeesList.getChildren().clear();
+        for(Employee emp : eventAttendees) {
+            editMeetingAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
+        }
+    }
+
+    private LinkedList<Event> getOpenSlots(Calendar day, long duration, int id) {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String currentDay = sdf.format(day.getTime());
+
+        LinkedList<Event> matchedEvents = db.getEmployeesEventsInRange(eventAttendees,
+                currentDay, id);
+
+        System.out.printf("\nEvents size: %d\n", matchedEvents.size());
+
+        Calendar start = (Calendar) day.clone();
+        Calendar end = (Calendar) day.clone();
+
+        start.set(Calendar.HOUR_OF_DAY, dayStart.get(Calendar.HOUR_OF_DAY));
+        start.set(Calendar.MINUTE, dayStart.get(Calendar.MINUTE));
+
+        end.set(Calendar.HOUR_OF_DAY, dayEnd.get(Calendar.HOUR_OF_DAY));
+        end.set(Calendar.MINUTE, dayEnd.get(Calendar.MINUTE));
+
+        LinkedList<Event> busy = new LinkedList<>();
+        LinkedList<Event> open = new LinkedList<>();
+
+        if(matchedEvents.size()  == 0) {
+            open.add(new Event(start.toInstant().toString(), end.toInstant().toString()));
+        } else {
+            Event ev = matchedEvents.get(0);
+            for (int i = 1; i < matchedEvents.size(); i++) {
+                int value = matchedEvents.get(i).getStart().compareTo(ev.getEnd());
+
+                if (value <= 0) {
+                    ev.setEnd(matchedEvents.get(i).getEnd());
+                } else {
+                    busy.add(ev);
+                    ev = matchedEvents.get(i);
+                }
+            }
+            busy.add(ev);
+
+            int bs = busy.size();
+
+
+            for (int i = 0; i < bs; i++) {
+                if(i == 0) {
+                    if(busy.get(i).getStart().getTime() - start.getTimeInMillis() >= duration) {
+                        open.add(new Event(start.toInstant().toString(), busy.get(i).getStart().toInstant().toString()));
+                    }
+                    if(bs == 1) {
+                        if(end.getTimeInMillis() - busy.get(i).getEnd().getTime() >= duration) {
+                            open.add(new Event(busy.get(i).getEnd().toInstant().toString(), end.toInstant().toString()));
+                        }
+                    }
+                } else if(i == bs - 1) {
+                    if(end.getTimeInMillis() - busy.get(i).getEnd().getTime() >= duration) {
+                        open.add(new Event(busy.get(i).getEnd().toInstant().toString(), end.toInstant().toString()));
+                    }
+                } else {
+                    if(busy.get(i).getStart().getTime() - busy.get(i-1).getEnd().getTime() >= duration) {
+                        open.add(new Event(busy.get(i-1).getEnd().toInstant().toString(),
+                                busy.get(i).getStart().toInstant().toString()));
+                    }
+                }
+            }
+        }
+        busy.forEach((v) -> {
+            System.out.printf("\nBusy: %s - %s", v.getStart().toString(), v.getEnd().toString());
+        });
+//
+        open.forEach((v) -> {
+            System.out.printf("\nOpen: %s - %s", v.getStart().toString(), v.getEnd().toString());
+        });
+        return open;
+    }
 
     private TitledPane createTitledPane(Instant start, Instant end) {
         TitledPane tp = new TitledPane();
         tp.getStylesheets().add(getClass().getResource("/css/main.css").toString());
-        tp.setText(String.format("%s - %s", Date.from(start).toString(), Date.from(end).toString()));
+
+        SimpleDateFormat sdf = new SimpleDateFormat("EEE, MMM d, HH:mm");
+        String dateFrom = sdf.format(Date.from(start));
+        sdf = new SimpleDateFormat("HH:mm");
+        String dateTo = sdf.format(Date.from(end));
+
+        tp.setText(String.format("%s - %s", dateFrom, dateTo));
 
         GridPane gridPane = new GridPane();
 
@@ -596,10 +1210,22 @@ public class DiaryController {
         button.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+                if(editMeetingVBox.isDisabled() && !searchPotentialVBox.isDisabled()) {
+                    clearEditEventDialogFields();
+//                    populateEditMeetingAttendeeList();
+                    editMeetingDuration.setValue(searchPotentialDuration.getValue());
+                    closePane(searchPotentialVBox);
+//                    showPane(editMeetingVBox);
+                    Event e = new Event();
+                    e.setId(-1);
+                    e.setOrganizer(currentUser);
+                    constructEditEventDialog(e);
+                } else {
+                    closePane(editMeetingSuggestionVBox);
+                }
                 Long changedTime = Long.parseLong(hiddenTime.getText());
                 editMeetingDate.setValue(Instant.ofEpochMilli(changedTime).atZone(ZoneId.systemDefault()).toLocalDate());
                 editMeetingTime.setValue(Instant.ofEpochMilli(changedTime).atZone(ZoneId.systemDefault()).toLocalTime());
-                closePane(editMeetingSuggestionVBox);
             }
         });
         button.setStyle("-fx-background-color: rgb(48, 68, 99);-fx-text-fill: white");
@@ -698,7 +1324,6 @@ public class DiaryController {
     }
 
     private void closePane(VBox box) {
-
         FadeTransition fadeTransition = new FadeTransition();
         fadeTransition.setDuration(Duration.millis(100));
         fadeTransition.setNode(box);
@@ -707,33 +1332,42 @@ public class DiaryController {
         fadeTransition.play();
         box.setDisable(true);
         box.setOpacity(0);
+        box.setDisable(true);
+        box.setOpacity(0);
+//        box.toBack();
+    }
+
+    private void showPane(VBox box) {
+        FadeTransition fadeTransition = new FadeTransition();
+        fadeTransition.setDuration(Duration.millis(100));
+        fadeTransition.setNode(box);
+        fadeTransition.setFromValue(0);
+        fadeTransition.setToValue(1);
+        fadeTransition.play();
+        box.setDisable(false);
+        box.setOpacity(1.0);
+        box.toFront();
     }
 
     private void constructDetailedMeetingDialog(Event e) {
         meetingDetailsButtonsGrid.getChildren().clear();
+        meetingDetailsDelete.setDisable(true);
+        meetingDetailsDelete.setOpacity(0);
 
-        FadeTransition fadeTransition = new FadeTransition();
-        fadeTransition.setDuration(Duration.millis(100));
-        fadeTransition.setNode(meetingDetailsVBox);
-        fadeTransition.setFromValue(0);
-        fadeTransition.setToValue(1);
-        fadeTransition.play();
+        showPane(meetingDetailsVBox);
 
-        meetingDetailsVBox.setDisable(false);
-        meetingDetailsVBox.setOpacity(1.0);
         meetingDetailsVBox.setStyle("-fx-background-color: rgb(255, 255, 255, 1)");
-        meetingDetailsVBox.setMouseTransparent(false);
 
-        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if(!inHierarchy(event.getPickResult().getIntersectedNode(), meetingDetailsVBox)) {
-                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, this);
-                    closePane(meetingDetailsVBox);
-                }
-            }
-        };
-        meetingsGrid.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
+//        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                if(!inHierarchy(event.getPickResult().getIntersectedNode(), meetingDetailsVBox)) {
+//                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, this);
+//                    closePane(meetingDetailsVBox);
+//                }
+//            }
+//        };
+//        meetingsGrid.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
 
         meetingDetailsSubject.setText(e.getTitle());
         meetingDetailsDate.setText(new SimpleDateFormat("YYY-MM-dd").format(e.getStart()));
@@ -759,19 +1393,41 @@ public class DiaryController {
         okay.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
                 closePane(meetingDetailsVBox);
             }
         });
         buttonGrid.add(okay, 0, 0);
 
-        if(employeeID == e.getOrganizer().getId()) {
+        meetingDetailsDelete.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(currentUser.getId() == e.getOrganizer().getId()) {
+                    System.out.println("deleting meeting");
+                    if(db.deleteEvent(e.getId(), 0)) {
+                        closePane(meetingDetailsVBox);
+                        displayMeetings();
+                        populateEventListView();
+                    }
+                } else {
+                    if(e.getStart().compareTo(currentDate.getTime()) < 0) {
+                        System.out.println("deleting meeting");
+                        if(db.deleteEvent(e.getId(), currentUser.getId())) {
+                            closePane(meetingDetailsVBox);
+                            displayMeetings();
+                            populateEventListView();
+                        }
+                    }
+                }
+            }
+        });
+
+        if(currentUser.getId() == e.getOrganizer().getId()) {
             Button edit = createButtonForDialog("Edit");
 
             edit.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
+//                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
                     closePane(meetingDetailsVBox);
                     constructEditEventDialog(e);
                     System.out.println("Editing");
@@ -781,6 +1437,11 @@ public class DiaryController {
         }
         GridPane.setHgrow(buttonGrid, Priority.ALWAYS);
         meetingDetailsButtonsGrid.add(buttonGrid, 0, 3);
+
+        if(currentUser.getId() == e.getOrganizer().getId() || e.getStart().compareTo(currentDate.getTime()) < 0) {
+            meetingDetailsDelete.setDisable(false);
+            meetingDetailsDelete.setOpacity(1.0);
+        }
     }
 
     private Button createButtonForDialog(String text) {
@@ -908,7 +1569,7 @@ public class DiaryController {
     }
 
     private void displayMeetings() {
-        events = db.getEmployeeEvents(employeeID);
+        events = db.getEmployeeEvents(currentUser.getId());
         clearMeetings();
         for(Event e : events) {
             Calendar start = Calendar.getInstance();
@@ -980,9 +1641,21 @@ public class DiaryController {
         grid.add(label, 0, 4);
 
 
+        String colors[] = getPriorityColours(event.getPriority());
+
+
+        time.setStyle(colors[1]);
+        pane.setStyle(colors[0]);
+
+        pane.getChildren().addAll(grid);
+
+        return pane;
+    }
+
+    private String[] getPriorityColours(int priority) {
         String backAndBorderCol = "";
         String timeColor = "";
-        switch (event.getPriority()) {
+        switch (priority) {
             case 0:
                 backAndBorderCol = "-fx-background-color: rgba(245, 218, 170, 0.7);" +
                         "-fx-border-width: 2, 2, 2, 2; -fx-border-color: rgb(245, 218, 170)";
@@ -1000,12 +1673,7 @@ public class DiaryController {
                 break;
         }
 
-        time.setStyle(timeColor);
-        pane.setStyle(backAndBorderCol);
-
-        pane.getChildren().addAll(grid);
-
-        return pane;
+        return new String[]{backAndBorderCol, timeColor};
     }
 
     private int[] getMeetingPosition(Calendar start, Calendar end) {
@@ -1015,7 +1683,9 @@ public class DiaryController {
         int startMinute = start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE) -
                 startTime.get(Calendar.HOUR_OF_DAY) * 60 - startTime.get(Calendar.MINUTE);
 
-        int dayColumn = start.get(Calendar.DAY_OF_WEEK) - 1;
+        System.out.printf("DAY OF THE WEEK: %d", Calendar.DAY_OF_WEEK);
+
+        int dayColumn = weekdayTranslate[start.get(Calendar.DAY_OF_WEEK)];
         return new int[]{dayColumn, startMinute, minutes};
     }
 
@@ -1023,6 +1693,8 @@ public class DiaryController {
         for(Pane p : panes) {
             meetingsGrid.getChildren().remove(p);
         }
+        panes.clear();
+        displayedEvents.clear();
     }
 
     private void indicateCurrentDay() {

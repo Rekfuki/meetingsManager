@@ -2,6 +2,7 @@ package manager;
 
 import org.sqlite.SQLiteConfig;
 
+import java.lang.reflect.Executable;
 import java.sql.*;
 import java.util.LinkedList;
 import java.util.StringJoiner;
@@ -60,9 +61,8 @@ class Database {
             stmt.executeUpdate(sql);
             sql = "create table tasks " +
                     "(id integer not null primary key autoincrement," +
-                    "title text not null," +
-                    "description text not null," +
-                    "deadline text not null)";
+                    "priority text not null," +
+                    "description text not null)";
             stmt.executeUpdate(sql);
             sql = "create table employees_events " +
                     "(employee_id integer not null," +
@@ -70,13 +70,7 @@ class Database {
                     "foreign key(employee_id) references employees(id)," +
                     "foreign key(event_id) references events(id))";
             stmt.executeUpdate(sql);
-            sql = "create table employees_events_task " +
-                    "(employee_id integer not null," +
-                    "event_id integer not null," +
-                    "task_id integer not null," +
-                    "foreign key(employee_id) references employees(id)," +
-                    "foreign key(event_id) references events(id)," +
-                    "foreign key(task_id) references tasks(id))";
+
             stmt.executeUpdate(sql);
             stmt.close();
 
@@ -94,10 +88,10 @@ class Database {
 
     private boolean tablesExist() {
         connect();
-        String tables[] = {"employees", "events", "tasks", "employees_events", "employees_events_task"};
+        String tables[] = {"employees", "events", "tasks", "employees_events"};
         try {
             DatabaseMetaData md = c.getMetaData();
-            for(int i = 0; i < 5; i++) {
+            for(int i = 0; i < 4; i++) {
                 ResultSet rs = md.getTables(null, null, tables[i], null);
                 while(rs.next()) {
                     String tName = rs.getString("TABLE_NAME");
@@ -316,6 +310,7 @@ class Database {
 
             if(!updateEventAttendees(event.getId(), attendees)){
                 c.rollback();
+                c.setAutoCommit(true);
                 disconnect();
                 return false;
             }
@@ -341,19 +336,25 @@ class Database {
 
     public LinkedList<Event> getEmployeesEventsInRange(LinkedList<Employee> employees, String start, int id) {
         connect();
-//        System.out.printf("start: %s\nend: %s\n", start, end);
         StringJoiner joiner = new StringJoiner(", ");
         for(Employee e : employees) {
             joiner.add(String.format("%d", e.getId()));
         }
 
+        System.out.printf("Employee id's: %s", joiner.toString());
+
         String sql = String.format("select distinct ev.start, ev.end " +
                 "from events ev " +
                 "join employees_events ee on ee.event_id = ev.id " +
                 "where ee.employee_id in(%s) " +
-                "and ev.start like ? " +
-                "and ev.id != ?" +
-                "order by ev.start", joiner.toString());
+                "and ev.start like ? ", joiner.toString());
+
+        if(id != 0) {
+            sql += "and ev.id != ? ";
+        }
+
+        sql += "order by ev.start";
+
 
         LinkedList<Event> events = new LinkedList<>();
         try {
@@ -363,7 +364,11 @@ class Database {
 
             PreparedStatement stmt = c.prepareStatement(sql);
             stmt.setString(1, start+"%");
-            stmt.setInt(2, id);
+
+            if(id != 0) {
+                stmt.setInt(2, id);
+            }
+
             ResultSet rs = stmt.executeQuery();
 
             while(rs.next()) {
@@ -377,6 +382,112 @@ class Database {
         }
         disconnect();
         return events;
+    }
+
+    public boolean createEvent(Event e, LinkedList<Employee> attendees){
+        connect();
+
+        try {
+            c.setAutoCommit(false);
+            PreparedStatement stmt = c.prepareStatement("insert into" +
+                    " events(title, description, start, end, organizer, location, priority) values(?, ?, ?, ?, ?, ?, ?)",
+                    Statement.RETURN_GENERATED_KEYS);
+            stmt.setString(1, e.getTitle());
+            stmt.setString(2, e.getDesc());
+            stmt.setString(3, e.getStart().toInstant().toString());
+            stmt.setString(4, e.getEnd().toInstant().toString());
+            stmt.setInt(5, e.getOrganizer().getId());
+            stmt.setString(6, e.getLocation());
+            stmt.setInt(7, e.getPriority());
+
+            stmt.executeUpdate();
+
+            ResultSet rs = stmt.getGeneratedKeys();
+
+            int eventId = 0;
+
+            if(rs.next()) {
+                eventId = rs.getInt(1);
+            }
+
+            System.out.printf("new event id: %d", eventId);
+
+            if(!updateEventAttendees(eventId, attendees)) {
+                c.rollback();
+                disconnect();
+                c.setAutoCommit(true);
+                return false;
+            }
+
+            c.commit();
+            c.setAutoCommit(true);
+            disconnect();
+
+            return true;
+
+        } catch (Exception ex) {
+            System.err.println( e.getClass().getName() + ": " + ex.getMessage() );
+            try {
+                c.rollback();
+            } catch (SQLException exe) {
+                System.err.println( e.getClass().getName() + ": " + ex.getMessage() );
+            }
+            disconnect();
+            return false;
+        }
+    }
+
+    private boolean deleteEventLinks(int eventId, int employeeId) {
+
+        System.out.printf("Employee id: %d", employeeId);
+
+        try {
+            String sql = "delete from employees_events where event_id = ?";
+            if(employeeId > 0) {
+                sql += " and employee_id = ?";
+            }
+
+            PreparedStatement stmt = c.prepareStatement(sql);
+
+            stmt.setInt(1, eventId);
+            if(employeeId > 0) {
+                stmt.setInt(2, employeeId);
+            }
+            stmt.executeUpdate();
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        return false;
+    }
+
+    public boolean deleteEvent(int eventId, int employeeId) {
+        connect();
+        try {
+            c.setAutoCommit(false);
+            deleteEventLinks(eventId, employeeId);
+            if(employeeId == 0) {
+                PreparedStatement stmt = c.prepareStatement("delete from events where id = ?");
+                stmt.setInt(1, eventId);
+                stmt.executeUpdate();
+            }
+
+            c.commit();
+            c.setAutoCommit(true);
+            disconnect();
+
+            return true;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            try {
+                c.rollback();
+            } catch (SQLException ex) {
+                System.err.println( e.getClass().getName() + ": " + ex.getMessage() );
+            }
+            return false;
+        }
     }
 
     public LinkedList<Employee> getEmployees() {
@@ -400,59 +511,90 @@ class Database {
         return employees;
     }
 
-    public boolean removeEmployeeFromEvent(int employeeId, int eventId) {
+    public boolean createTask(int employeeId, Task task){
+        connect();
+
         try {
-            System.out.println(employeeId);
-            System.out.println(eventId);
-            PreparedStatement stmt = c.prepareStatement("delete from employees_events " +
-                    "where employee_id = ? and event_id = ?");
-            stmt.setInt(1, employeeId);
-            stmt.setInt(2, eventId);
+            PreparedStatement stmt = c.prepareStatement("insert into tasks(description, priority, employee_id)" +
+                    " values(?, ?, ?)");
+
+            stmt.setString(1, task.getDescription());
+            stmt.setInt(2, task.getPriority());
+            stmt.setInt(3, employeeId);
+
             stmt.executeUpdate();
+            disconnect();
+
             return true;
+
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+
+            disconnect();
+
+            return false;
+        }
+    }
+
+
+    public LinkedList<Task> getEmployeeTasks(int employeeId) {
+        connect();
+        LinkedList<Task> tasks = new LinkedList<>();
+        try {
+           PreparedStatement stmt = c.prepareStatement("select * from tasks where employee_id = ?");
+           stmt.setInt(1, employeeId);
+           ResultSet rs = stmt.executeQuery();
+
+           while (rs.next()) {
+               tasks.add(new Task(
+                       rs.getInt("id"),
+                       rs.getString("description"),
+                       rs.getInt("priority")
+               ));
+           }
+
         } catch (Exception e) {
             System.err.println( e.getClass().getName() + ": " + e.getMessage() );
         }
+        return tasks;
+    }
+
+    public boolean updateTask(Task task) {
+        connect();
+        try {
+            PreparedStatement stmt = c.prepareStatement("update tasks set description = ?, priority = ?" +
+                    " where id = ?");
+
+            stmt.setString(1, task.getDescription());
+            stmt.setInt(2, task.getPriority());
+            stmt.setInt(3, task.getId());
+
+            stmt.executeUpdate();
+            disconnect();
+
+            return true;
+        } catch (Exception e) {
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            disconnect();
+
+            return false;
+        }
+    }
+
+    public boolean deleteTask(int taskId) {
+        connect();
+        try {
+            PreparedStatement stmt = c.prepareStatement("delete from tasks where id = ?");
+            stmt.setInt(1, taskId);
+            stmt.executeUpdate();
+
+            disconnect();
+            return true;
+
+        } catch (Exception e){
+            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+        }
+        disconnect();
         return false;
-    }
-
-    public void createEmployee(String name, String login, String paswd){
-        String sql = "INSERT INTO employees(name, login, paswd) VALUES(?,?,?)";
-
-        try(PreparedStatement pstmt = c.prepareStatement(sql)){
-            pstmt.setString(1, name);
-            pstmt.setString(2, login);
-            pstmt.setString(2, paswd);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void createEvent(String title, String description, String start, String end){
-        String sql = "INSERT INTO events(title, description, start, end) VALUES(?,?,?,?)";
-
-        try(PreparedStatement pstmt = c.prepareStatement(sql)){
-            pstmt.setString(1, title);
-            pstmt.setString(2, description);
-            pstmt.setString(3, start);
-            pstmt.setString(4, end);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    public void createTask(String title, String description, String deadline){
-        String sql = "INSERT INTO tasks(title, description, deadline) VALUES(?,?,?)";
-
-        try(PreparedStatement pstmt = c.prepareStatement(sql)){
-            pstmt.setString(1, title);
-            pstmt.setString(2, description);
-            pstmt.setString(3, deadline);
-            pstmt.executeUpdate();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
 }

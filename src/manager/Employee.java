@@ -13,6 +13,12 @@ public class Employee {
         this.email = email;
     }
 
+    Employee() {
+        this.name = "";
+        this.id = 0;
+        this.email = "";
+    }
+
     public String getName() {
         return name;
     }

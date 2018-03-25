@@ -46,6 +46,17 @@ public class Event {
         }
     }
 
+    Event() {
+        this.id = 0;
+        this.title = "";
+        this.desc = "";
+        this.start = null;
+        this.end = null;
+        this.organizer = null;
+        this.location = "";
+        this.priority = 0;
+    }
+
     public int getId() {
         return id;
     }
