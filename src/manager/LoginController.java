@@ -15,7 +15,15 @@ import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
 
+
+/**
+ * controller for the login/signup part of GUI
+ */
 public class LoginController {
+
+    /**
+     * all of the graphical fxml elements
+     */
     @FXML public StackPane rootPane;
     @FXML public JFXButton signIn;
     @FXML public JFXButton signUp;
@@ -31,16 +39,27 @@ public class LoginController {
     @FXML public JFXTextField signUpUsername;
     @FXML public JFXPasswordField signUpPassword;
 
+    /**
+     * instance of a database connection
+     */
     private Database db = new Database();
+
+    /**
+     * employee id that is retrieved after successful login
+     */
     private int employeeId;
 
 
+    /**
+     * Runs during the start of the login window
+     */
     @FXML
     void initialize() {
+        db.setup(); //checks if database contains tables and triggers
         RequiredFieldValidator validator = new RequiredFieldValidator();
         validator.setMessage("NAME IS REQUIRED");
         signUpName.getValidators().add(validator);
-        signUpName.focusedProperty().addListener((o, oldVal, newVal) -> {
+        signUpName.focusedProperty().addListener((o, oldVal, newVal) -> { //event listener is bound to the name field
             if(!newVal) {
                 signUpName.validate();
             }
@@ -49,7 +68,7 @@ public class LoginController {
         validator = new RequiredFieldValidator();
         validator.setMessage("EMAIL IS REQUIRED");
         signUpUsername.getValidators().add(validator);
-        signUpUsername.focusedProperty().addListener((o, oldVal, newVal) -> {
+        signUpUsername.focusedProperty().addListener((o, oldVal, newVal) -> { //event listener is bound to the username field
             if(!newVal) {
                 signUpUsername.validate();
             }
@@ -58,7 +77,7 @@ public class LoginController {
         validator = new RequiredFieldValidator();
         validator.setMessage("PASSWORD IS REQUIRED");
         signUpPassword.getValidators().add(validator);
-        signUpPassword.focusedProperty().addListener((o, oldVal, newVal) ->{
+        signUpPassword.focusedProperty().addListener((o, oldVal, newVal) ->{ //event listener is bound to the password field
             if(!newVal) {
                 signUpPassword.validate();
             }
@@ -66,13 +85,16 @@ public class LoginController {
 
     }
 
+    /**
+     * Event that fires whenever sign in is pressed
+     * @param actionEvent Type of an actionEvent
+     */
     public void attemptSignIn(ActionEvent actionEvent) {
-        if(signIn()) {
+        if(signIn()) { //if login is successful
             loginLabel.setText("SUCCESS");
             loginLabel.setStyle("-fx-text-fill: green");
             loginLabel.setOpacity(1.0);
-            // TODO: 15/03/2018 store id and load diary
-            try {
+            try { // diary fxml file and controller is created in separate thread to prevent GUI lockout
                 Task<Parent> loadTask = new Task<Parent>() {
                     @Override
                     public Parent call() throws IOException {
@@ -81,9 +103,6 @@ public class LoginController {
                         loader.setController(controller);
 
                         return (StackPane) loader.load();
-
-
-//                        return (StackPane) FXMLLoader.load(getClass().getResource("/fxml/diary.fxml"));
                     }
                 };
                 loadTask.setOnSucceeded(e -> {
@@ -99,10 +118,14 @@ public class LoginController {
                 System.err.println( e.getClass().getName() + ": " + e.getMessage() );
             }
         } else {
-            System.out.println("login failed");
             incorrect();
         }
     }
+
+    /**
+     * Retrieves text from username and password fields and retrieves user id from the database
+     * @return user exists in the database
+     */
     private boolean signIn(){
         String username = usernameField.getText();
         String password = passwordField.getText();
@@ -110,13 +133,20 @@ public class LoginController {
         return employeeId != 0;
     }
 
+    /**
+     * Event that fires whenever sign up is pressed
+     * @param mouseEvent type of a mouse event
+     */
     public void signUp(MouseEvent mouseEvent) {
-        if(signUpName.validate() && signUpUsername.validate() && signUpPassword.validate()) {
-            if(db.checkUsername(signUpUsername.getText())) {
-                if(db.addEmployee(signUpName.getText(), signUpUsername.getText(), signUpPassword.getText())) {
+        if(signUpName.validate() && signUpUsername.validate() && signUpPassword.validate()) { //if validation pass
+            if(db.checkUsername(signUpUsername.getText())) { //if username is not taken
+                if(db.addEmployee(signUpName.getText(), signUpUsername.getText(), signUpPassword.getText())) { //if user is created successfully
                     signUpLabel.setText("SUCCESS");
                     signUpLabel.setStyle("-fx-text-fill: green");
-                    // TODO: 16/03/2018 load diary window and store employee id 
+                    loginLabel.setText("USER SUCCESSFULLY CREATED");
+                    loginLabel.setStyle("-fx-text-fill: green");
+
+                    backToLogin(null); //returns back to the login widow
                 }
             } else {
                 signUpLabel.setText("EMAIL ALREADY EXISTS");
@@ -125,7 +155,9 @@ public class LoginController {
         }
     }
 
-
+    /**
+     * Indicates if login fails
+     */
     private void incorrect() {
         usernameField.setStyle("-jfx-unfocus-color: red");
         passwordField.setStyle("-jfx-unfocus-color: red");
@@ -134,6 +166,11 @@ public class LoginController {
         loginLabel.setOpacity(1.0);
     }
 
+    /**
+     * Goes back to login pane when back is pressed or new user is successfully created.
+     * Resets all fields and labels
+     * @param mouseEvent type of a mouse event
+     */
     public void backToLogin(MouseEvent mouseEvent) {
         signUpPane.setDisable(true);
         signUpPane.setOpacity(0.0);
@@ -142,18 +179,27 @@ public class LoginController {
         signUpName.resetValidation();
         signUpUsername.resetValidation();
         signUpPassword.resetValidation();
+        signUpName.clear();
+        signUpUsername.clear();
+        signUpPassword.clear();
 
         loginPane.setDisable(false);
         loginPane.setOpacity(1.0);
     }
 
+    /**
+     * goes to sign up pane when sign up button is pressed.
+     * clears all of the fields
+     * @param mouseEvent type of a mouse event
+     */
     public void gotoSignUp(MouseEvent mouseEvent) {
         loginPane.setDisable(true);
         loginPane.setOpacity(0.0);
         loginLabel.setStyle(null);
-        loginLabel.setOpacity(0);
         loginLabel.setText("");
         signUpPane.setDisable(false);
         signUpPane.setOpacity(1.0);
+        usernameField.clear();
+        passwordField.clear();
     }
 }

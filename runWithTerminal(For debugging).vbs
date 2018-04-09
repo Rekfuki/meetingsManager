@@ -1,0 +1,1 @@
+CreateObject("Wscript.Shell").Run "Windows_meetingsManager.bat",0,True

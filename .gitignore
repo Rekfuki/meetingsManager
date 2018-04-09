@@ -5,3 +5,7 @@
 lib/*.db
 docs/*
 out/*
+*.jpg
+*.png
+*.bat
+*.jar

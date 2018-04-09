@@ -4,21 +4,61 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
+
+/**
+ * Class to store event related methods and fields
+ */
 public class Event {
+    /**
+     * event id, has to be unique
+     */
     private int id;
+    /**
+     * event title
+     */
     private String title;
+    /**
+     * event description
+     */
     private String desc;
+    /**
+     * event start date and time
+     */
     private Date start;
+    /**
+     * event end date and time
+     */
     private Date end;
+    /**
+     * organizer of the event
+     */
     private Employee organizer;
+    /**
+     * location of the event
+     */
     private String location;
+    /**
+     * priority of the event
+     */
     private int priority;
 
+    /**
+     * Event constructor that is used when creating event object from database
+     * @param eid event id
+     * @param etitle event title
+     * @param edesc event description
+     * @param estart event start date
+     * @param eend event end date
+     * @param eorg event organizer
+     * @param eloc event location
+     * @param eprio event priority
+     */
     Event(int eid, String etitle, String edesc, String estart, String eend, int eorg, String eloc, int eprio) {
         this.id = eid;
         this.title = etitle;
         this.desc = edesc;
 
+        //new formatter to convert instant time string to date
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 
@@ -33,8 +73,13 @@ public class Event {
         this.location = eloc;
         this.priority = eprio;
     }
+
+    /**
+     * Event constructor that is used when creating event from just start time and end time
+     * @param eStart event start
+     * @param eEnd event end
+     */
     Event(String eStart, String eEnd) {
-        System.out.printf("\nEvent constructor start time: %s\nEvent constructor end time: %s\n", eStart, eEnd);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         try {
@@ -42,10 +87,13 @@ public class Event {
             this.end = sdf.parse(eEnd);
         } catch (Exception ex) {
             System.err.println( ex.getClass().getName() + ": " + ex.getMessage() );
-            System.out.println("Failed to parse date in here");
         }
     }
 
+    /**
+     * Event constructor that is used when creating an empty event for validation purposes.
+     * Allows to perform checks where the event came from and what is suppose to be done with it
+     */
     Event() {
         this.id = 0;
         this.title = "";
@@ -57,22 +105,34 @@ public class Event {
         this.priority = 0;
     }
 
+    /**
+     * gets event id
+     * @return event id
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * sets event id
+     * @param id event id
+     */
     public void setId(int id) {
         this.id = id;
     }
 
+    /**
+     * gets event title
+     * @return event title
+     */
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
+    /**
+     * gets event description
+     * @return event description
+     */
     public String getDesc() {
         if(desc == null) {
             return "";
@@ -80,48 +140,59 @@ public class Event {
         return desc;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
+    /**
+     * gets event start date
+     * @return event start date
+     */
     public Date getStart() {
         return start;
     }
 
-    public void setStart(Date start) {
-        this.start = start;
-    }
-
+    /**
+     * gets event end date
+     * @return event end date
+     */
     public Date getEnd() {
         return end;
     }
 
+    /**
+     * sets event end time
+     * @param end event end time
+     */
     public void setEnd(Date end) {
         this.end = end;
     }
+
+    /**
+     * gets event organizer
+     * @return event organizer
+     */
     public Employee getOrganizer() {
         return organizer;
     }
 
+    /**
+     * sets event organizer
+     * @param organizer event organizer
+     */
     public void setOrganizer(Employee organizer) {
         this.organizer = organizer;
     }
+
+    /**
+     * gets event location
+     * @return revent location
+     */
     public String getLocation() {
         return location;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
+    /**
+     * gets event priority
+     * @return event priority
+     */
     public int getPriority() {
         return priority;
-    }
-
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-    public void print(){
-        System.out.printf("\nEvent id: %d\nEvent name: %s\nEvent desc: %s\nEvent start: %s\nEvent end: %s",
-                id, title, desc, start, end);
     }
 }

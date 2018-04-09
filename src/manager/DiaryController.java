@@ -5,7 +5,6 @@ import javafx.animation.FadeTransition;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -22,6 +21,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 import javafx.util.Duration;
 import javafx.util.converter.LocalTimeStringConverter;
 import org.controlsfx.control.textfield.TextFields;
@@ -29,19 +29,21 @@ import org.controlsfx.control.textfield.TextFields;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
-import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
+/**
+ * diary controller class
+ */
 
-//public class DiaryController {
 public class DiaryController  implements Initializable {
+    /**
+     * all of the GUI fx:id assigned elements
+     */
     @FXML public Label currentWeek;
     @FXML public JFXDatePicker datePicker;
     @FXML public GridPane meetingsGrid;
@@ -118,38 +120,78 @@ public class DiaryController  implements Initializable {
     @FXML public JFXTimePicker searchPotentialDuration;
     @FXML public Label currentUserName;
     @FXML public Label searchPotentialTimeTaken;
+    @FXML public JFXButton undoButton;
 
-
+    /**
+     * schedule start
+     */
     private Calendar startTime = Calendar.getInstance(Locale.getDefault());
+    /**
+     * intervals of of meeting display
+     */
     private Calendar interval = Calendar.getInstance(Locale.getDefault());
+    /**
+     * current date of the application runtime
+     */
     private Calendar currentDate = Calendar.getInstance(Locale.getDefault());
+    /**
+     * instance of the database
+     */
     private Database db = new Database();
-    // TODO: 24/03/2018 remove before deploying 
-    private int currentEmployeeId = 1;
+    /**
+     * current user object, stores email, id and name
+     */
     private Employee currentUser;
+    /**
+     * all of the events available
+     */
     private LinkedList<Event> events;
+    /**
+     * events that are currently displayed
+     */
     private LinkedList<Event> displayedEvents = new LinkedList<>();
+    /**
+     * currently displayed event panes
+     */
     private LinkedList<StackPane> panes = new LinkedList<>();
+    /**
+     * attendees of an event, has to be global because it is accessed from inner classes and cannot be final
+     */
     private LinkedList<Employee> eventAttendees = new LinkedList<>();
+    /**
+     * Current day indicator
+     */
     private Node currentDayIndic;
+    /**
+     * translation array for week starts, for some reason the day starts on Sunday and not Monday, therefore its needed
+     */
     private int[] weekdayTranslate = {0, 7, 1, 2, 3, 4, 5, 6};
 
+    /**
+     * start of the schedule
+     */
     private Calendar dayStart = Calendar.getInstance();
+    /**
+     * end of the schedule
+     */
     private Calendar dayEnd = Calendar.getInstance();
 
-//    public void initialize(URL location, ResourceBundle resources) {
-//
-//    }
-
+    /**
+     * controller constructor, used to hand over employee object from sign in session
+     * @param currentUser user that is signed in
+     */
     DiaryController(Employee currentUser) {
         this.currentUser = currentUser;
     }
 
+    /**
+     * initialization method, performs setup of the diary before it is displayed to the user
+     * @param location -
+     * @param resources -
+     */
     public void initialize(URL location, ResourceBundle resources) {
+        db.clearLogs(); //clears previous session undo logs
 
-//    public void initialize() {
-        db.setup();
-//        currentUser = db.getEmployeeByID(currentEmployeeId);
         AnchorPane.setRightAnchor(rootDiaryPane, 0.0);
         AnchorPane.setBottomAnchor(rootDiaryPane, 0.0);
         AnchorPane.setLeftAnchor(rootDiaryPane, 0.0);
@@ -157,6 +199,7 @@ public class DiaryController  implements Initializable {
 
         currentUserName.setText(currentUser.getName());
 
+        //formatting time picker input fields to show 24 hours
         scheduleStart.setIs24HourView(true);
         scheduleStart.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
                 DateTimeFormatter.ofPattern("HH:mm")));
@@ -164,35 +207,42 @@ public class DiaryController  implements Initializable {
         scheduleEnd.setIs24HourView(true);
         scheduleEnd.setConverter(new LocalTimeStringConverter(DateTimeFormatter.ofPattern("HH:mm"),
                 DateTimeFormatter.ofPattern("HH:mm")));
+
+        //applying css
         rootDiaryPane.getStylesheets().add(getClass().getResource("/css/main.css").toString());
         editMeetingRootPane.getStylesheets().add(getClass().getResource("/css/editMeetings.css").toString());
         searchPotentialVBox.getStylesheets().add(getClass().getResource("/css/editMeetings.css").toString());
 
-
+        //populating interval choice box
         scheduleIntervals.getItems().addAll(
                 FXCollections.observableArrayList("15 min", "30 min", "1 hour"));
         scheduleIntervals.getSelectionModel().select(0);
 
+        //populating task priority choice box
         editTaskPriority.getItems().addAll(FXCollections.observableArrayList("Low", "Medium", "High"));
         editTaskPriority.getSelectionModel().select(0);
 
+        //setting initial schedule start from 8 to 20
         scheduleStart.setValue(LocalTime.parse("08:00"));
         scheduleEnd.setValue(LocalTime.parse("20:00"));
 
+        //setting initial day start from 8 to 20
         dayStart = setDayStartEndCalendar("8:00", dayStart);
         dayEnd = setDayStartEndCalendar("20:00", dayEnd);
 
+        //Seeting current week indicator to the week of currently running application
         currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
         currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentDate.get(Calendar.DAY_OF_WEEK)]);
         indicateCurrentDay();
         datePicker.setValue(LocalDate.now());
 
-
+        //setting start time to 8 am and intervals to 15 min
         startTime.set(Calendar.HOUR_OF_DAY, 8);
         startTime.set(Calendar.MINUTE, 0);
         interval.set(Calendar.MINUTE, 15);
         interval.set(Calendar.HOUR_OF_DAY, 0);
 
+        //signout handler, loads login window
         signOut.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -218,8 +268,19 @@ public class DiaryController  implements Initializable {
             }
         });
 
+        //binds event to perform undo when undo button is pressed
+        undoButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                db.undo();
+                displayMeetings();
+                populateEventListView();
+                populateTaskListView();
+            }
+        });
+
+        //start of gui bindings
         editMeetingTitle.focusedProperty().addListener((o, oldVal, newVal) ->{
-            System.out.println(editMeetingTitle.getText());
             if(!newVal) {
                 if (editMeetingTitle.getText().equals("")) {
                     editMeetingTitleLabel.setStyle("-fx-text-fill: red");
@@ -230,7 +291,6 @@ public class DiaryController  implements Initializable {
         });
 
         editMeetingDate.focusedProperty().addListener((o, oldVal, newVal) -> {
-            System.out.println(editMeetingDate.getValue());
             if(!newVal) {
                 if(editMeetingDate.getValue() == null) {
                     editMeetingDateLabel.setStyle("-fx-text-fill: red");
@@ -345,7 +405,8 @@ public class DiaryController  implements Initializable {
             @Override
             public void handle(ActionEvent event) {
                 dayStart = setDayStartEndCalendar(scheduleStart.getValue().toString(), dayStart);
-                System.out.println(scheduleStart.getValue().toString());
+                startTime = setDayStartEndCalendar(scheduleStart.getValue().toString(), startTime);
+                updateTimeInterval();
             }
         });
 
@@ -353,6 +414,7 @@ public class DiaryController  implements Initializable {
             @Override
             public void handle(ActionEvent event) {
                 dayEnd = setDayStartEndCalendar(scheduleEnd.getValue().toString(), dayEnd);
+                updateTimeInterval();
             }
         });
 
@@ -361,7 +423,8 @@ public class DiaryController  implements Initializable {
             public void handle(ActionEvent event) {
                 if(editMeetingVBox.isDisabled()) {
                     Event e = new Event();
-                    e.setId(0);
+                    e.setId(0); //event with id 0 is initialized because this allows to check
+                    //if the event is coming from edit pane
                     e.setOrganizer(currentUser);
                     constructEditEventDialog(e);
                 } else {
@@ -441,10 +504,17 @@ public class DiaryController  implements Initializable {
             }
         });
 
+        //when everything is initialized meetings are displayed
         updateTimeInterval();
         displayMeetings();
     }
 
+    /**
+     * Takes HH:mm formatted time, splits it and sets for a calendar
+     * @param t HH:mm formatted time string
+     * @param c Calendar to which the time needs to be set
+     * @return Calendar with set time
+     */
     private Calendar setDayStartEndCalendar(String t, Calendar c) {
         String time[] = t.split(":");
         int h = Integer.parseInt(time[0]);
@@ -457,6 +527,9 @@ public class DiaryController  implements Initializable {
         return c;
     }
 
+    /**
+     * resets graphical elements of the search window
+     */
     private void resetSearchPane() {
         searchPotentialStartDate.setValue(null);
         searchPotentialEndDate.setValue(null);
@@ -472,11 +545,15 @@ public class DiaryController  implements Initializable {
         searchPotentialTimeTaken.setText("");
     }
 
+    /**
+     * populates the search pane
+     */
     private void constructSearchPane() {
         resetSearchPane();
         showPane(searchPotentialVBox);
         eventAttendees.clear();
 
+        //adding all of the employees to the suggestion box
         LinkedList<Employee> employees = db.getEmployees();
         ArrayList<String> tmp = new ArrayList<>();
         for (Employee tmpEmp : employees) {
@@ -488,7 +565,8 @@ public class DiaryController  implements Initializable {
 
         TextFields.bindAutoCompletion(searchPotentialAttendees, tmp);
 
-
+        //on enter pressed when employee is selected checks if the user is not already added in
+        //if not added name and email is split and based on email(because its unique) employee object is added to list pane
         searchPotentialAttendees.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -497,7 +575,7 @@ public class DiaryController  implements Initializable {
                     String user[] = searchPotentialAttendees.getText().split(", ");
                     boolean contains = false;
                     for(Employee emp : eventAttendees) {
-                        if(user.length > 0) {
+                        if(user.length > 1) {
                             if(emp.getEmail().equals(user[1])) {
                                 contains = true;
                                 searchPotentialAttendeesLabel.setStyle("-fx-text-fill: red");
@@ -507,7 +585,7 @@ public class DiaryController  implements Initializable {
                     }
                     if(!contains) {
                         for(Employee emp : employees) {
-                            if(user.length > 0) {
+                            if(user.length > 1) {
                                 if (emp.getEmail().equals(user[1])) {
                                     searchPotentialAttendeesLabel.setStyle(null);
                                     eventAttendees.add(emp);
@@ -524,54 +602,55 @@ public class DiaryController  implements Initializable {
             }
         });
 
+
+        //when search buttons is pressed
         searchPotentialSearch.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 if(validateForSearch(eventAttendees)) {
                     try {
-                        long startSearchTime = System.nanoTime();
-                        System.out.println("Validation passed");
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+                        //start date of the potential meeting
                         Calendar start = Calendar.getInstance();
                         start.setTime(sdf.parse(searchPotentialStartDate.getValue().toString()));
 
+                        //end date of the potential meeting
                         Calendar end = Calendar.getInstance();
                         end.setTime(sdf.parse(searchPotentialEndDate.getValue().toString()));
 
+                        //duration is retrieved, split and converted into milliseconds
                         String time[] = searchPotentialDuration.getValue().toString().split(":");
                         long duration = (Integer.parseInt(time[0]) * 60 + Integer.parseInt(time[1])) * 60000;
 
-
+                        //get all of the available slots for the date range specified
                         LinkedList<Event> allAvailableSlots = new LinkedList<>();
+
+                        //takes start time when button was pressed, used to determine how long it took to find the results
+                        long startSearchTime = System.nanoTime();
+
                         for(; start.getTime().compareTo(end.getTime()) <= 0;
                             start.add(Calendar.DAY_OF_YEAR, 1)) {
 
                             LinkedList<Event> open = getOpenSlots(start, duration, 0);
                             allAvailableSlots.addAll(open);
                         }
+                        //calculates how long it took to retrive the results
                         long timeTaken = (System.nanoTime() - startSearchTime) / 1000000;
-//                        ObservableList<String> list = FXCollections.observableArrayList();
                         searchPotentialAccordion.getPanes().clear();
 
+                        //if no open slots are available then user is informed, otherwise open slots are displayed
+                        //and user can choose any of the particular slots
                         if(allAvailableSlots.size() == 0) {
                             TitledPane tp = new TitledPane();
-                            tp.setText("The meeting cannot be scheduled today, please try another day");
+                            tp.setText("The meeting cannot be scheduled in the given range");
                             searchPotentialAccordion.getPanes().add(tp);
                         } else {
                             allAvailableSlots.forEach((v) -> {
                                 Instant upperBound = Instant.ofEpochMilli(v.getEnd().getTime() - duration);
                                 searchPotentialAccordion.getPanes().add(createTitledPane(v.getStart().toInstant(), upperBound));
-//                                list.add(v.getStart().toString());
                             });
-//                            editMeetingSuggestionVBox.setDisable(false);
-//                            editMeetingSuggestionVBox.setOpacity(1.0);
                         }
-                        allAvailableSlots.forEach((v) -> {
-                            System.out.printf("\nOpen: %s - %s", v.getStart(), v.getEnd());
-
-
-                        });
 
                         searchPotentialTimeTaken.setText(String.format("%d slots in %d ms",
                                 searchPotentialAccordion.getPanes().size(), timeTaken));
@@ -584,6 +663,11 @@ public class DiaryController  implements Initializable {
         });
     }
 
+    /**
+     * validates all the required fields for searching meeting availability
+     * @param employees list of employees that need to attend the meeting
+     * @return if the validation passed
+     */
     private boolean validateForSearch(LinkedList<Employee> employees) {
         boolean valid = true;
         if(searchPotentialStartDate.getValue() == null) {
@@ -609,6 +693,10 @@ public class DiaryController  implements Initializable {
         return valid;
     }
 
+    /**
+     * populates and displays task edit window
+     * @param t Task object hat needs to be edited
+     */
     private void constructEditTaskView(Task t) {
         showPane(editTaskListVBox);
         editTaskDelete.setDisable(true);
@@ -623,20 +711,20 @@ public class DiaryController  implements Initializable {
             editTaskDelete.setOpacity(1);
         }
 
+        //when update button is pressed
         editTaskUpdate.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-
                 int priority = editTaskPriority.getSelectionModel().getSelectedIndex();
                 if(t.getId() > 0) {
                     Task task = new Task(t.getId(), editTaskDescription.getText(), priority);
                     if(!db.updateTask(task)) {
-                        System.out.println("Failed to update task");
+                        createAlert("Failed to update task. Check log file");
                     }
                 } else {
                     Task task = new Task(editTaskDescription.getText(), priority);
                     if(!db.createTask(currentUser.getId(), task)) {
-                        System.out.println("Failed to update task");
+                        createAlert("Failed to update task. Check log file");
                     }
                 }
                 closePane(editTaskListVBox);
@@ -644,11 +732,12 @@ public class DiaryController  implements Initializable {
             }
         });
 
+        //when delete button is pressed task is deleted
         editTaskDelete.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 if(!db.deleteTask(t.getId())) {
-                    System.out.println("Failed to delete task");
+                    createAlert("Failed to delete task. Check log file");
                 }
                 populateTaskListView();
                 closePane(editTaskListVBox);
@@ -656,23 +745,35 @@ public class DiaryController  implements Initializable {
         });
     }
 
+    /**
+     * shows the window and po
+     * polates it with data
+     */
     private void constructTaskListView() {
         showPane(taskListViewVBox);
         populateTaskListView();
     }
 
+    /**
+     * populates task list with data
+     */
     private void populateTaskListView() {
         taskListViewListGrid.getChildren().clear();
         LinkedList<Task> tasks = db.getEmployeeTasks(currentUser.getId());
-        System.out.printf("Tasks: %d", tasks.size());
 
         for(Task t : tasks) {
            insertNewMeeting(t);
         }
     }
 
+    /**
+     * inserts new meeting into the meeting list view
+     * @param t
+     */
     private void insertNewMeeting(Task t) {
         Integer rows = 0;
+
+        //reflection is used here, because some genius who wrote javafx code decide to make getNumberOfRows() private
         try {
             Method method = taskListViewListGrid.getClass().getDeclaredMethod("getNumberOfRows");
             method.setAccessible(true);
@@ -730,6 +831,11 @@ public class DiaryController  implements Initializable {
         taskListViewListGrid.add(vBox, 0, rows, 3, 1);
     }
 
+    /**
+     * Creates an HBox column which is then populated with data and returned for insertion
+     * @param data information that needs to be inside of the column
+     * @return Hbox column with populated data
+     */
     private HBox createTaskListViewColumn(String data) {
         Label label = new Label(data);
         HBox.setMargin(label, new Insets(0, 10, 0, 10));
@@ -740,12 +846,18 @@ public class DiaryController  implements Initializable {
         return hBox;
     }
 
+    /**
+     * Shows event list view window and populates it with data
+     */
     private void constructEventListView() {
         showPane(eventListViewVBox);
 
         populateEventListView();
     }
 
+    /**
+     * populates event list with data
+     */
     private void populateEventListView() {
         eventListViewListGrid.getChildren().clear();
         String priority[] = {"Low", "Medium", "High"};
@@ -755,6 +867,8 @@ public class DiaryController  implements Initializable {
             GridPane gridPane = new GridPane();
             VBox vbox = new VBox(gridPane);
 
+            //creates title, description, start, end, organizer, location, priority columns
+            //and populates them with data
             gridPane.add(createListViewColumn(e.getTitle()), 0, i);
             gridPane.add(createListViewColumn(e.getDesc()), 1, i);
             gridPane.add(createListViewColumn(e.getStart().toString()), 2, i);
@@ -798,6 +912,11 @@ public class DiaryController  implements Initializable {
         eventListViewListGrid.getRowConstraints().add(rc);
     }
 
+    /**
+     * Creates HBox with data which is used as a column
+     * @param data data that needs to be put inside of the column
+     * @return Hbox object with the information
+     */
     private HBox createListViewColumn(String data) {
         Label label = new Label(data);
         HBox.setMargin(label, new Insets(0, 10, 0, 10));
@@ -809,6 +928,9 @@ public class DiaryController  implements Initializable {
         return hbox;
     }
 
+    /**
+     * Resets graphical elements of the event edit window
+     */
     private void clearEditEventDialogFields(){
         editMeetingTitle.clear();
         editMeetingDate.setValue(null);
@@ -829,23 +951,18 @@ public class DiaryController  implements Initializable {
         editMeetingAttendeesSearchLabel.setStyle(null);
     }
 
+    /**
+     * shows edit event window and populates it with data(if available)
+     * @param e Event object with all of the information
+     */
     private void constructEditEventDialog(Event e) {
         showPane(editMeetingVBox);
 
-//        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                if(!inHierarchy(event.getPickResult().getIntersectedNode(), editMeetingVBox) &&
-//                        !editMeetingVBox.isDisabled()) {
-//                    meetingsGrid.removeEventHandler(MouseEvent.MOUSE_CLICKED, this);
-//                    closePane(editMeetingVBox);
-//                }
-//            }
-//        };
-//        meetingsGrid.addEventHandler(MouseEvent.MOUSE_CLICKED, eventHandler);
-
         LinkedList<Employee> employees = db.getEmployees();
 
+        //if event id > 0, means event is being edited
+        //if event id == 0, means event is being created
+        //if event id < 0, means event is being created from potential meeting window
         if (e.getId() > 0) {
             clearEditEventDialogFields();
             editMeetingTitle.setText(e.getTitle());
@@ -876,13 +993,12 @@ public class DiaryController  implements Initializable {
                 }
             }
             if(!isInTheList) {
-                System.out.println("user is not in the list");
                 eventAttendees.add(currentUser);
             }
         }
 
 
-
+        //employee suggestion box is populated with available employees in the company
         ArrayList<String> tmp = new ArrayList<>();
         for (Employee tmpEmp : employees) {
             StringJoiner joiner = new StringJoiner(", ");
@@ -893,6 +1009,9 @@ public class DiaryController  implements Initializable {
 
         TextFields.bindAutoCompletion(editMeetingAttendeesSearch, tmp);
 
+
+        //on enter pressed when employee is selected checks if the user is not already added in
+        //if not added name and email is split and based on email(because its unique) employee object is added to list pane
         editMeetingAttendeesSearch.setOnKeyPressed(new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
@@ -901,7 +1020,7 @@ public class DiaryController  implements Initializable {
                     String user[] = editMeetingAttendeesSearch.getText().split(", ");
                     boolean contains = false;
                     for(Employee emp : eventAttendees) {
-                        if(user.length > 0){
+                        if(user.length > 1){
                             if(emp.getEmail().equals(user[1])) {
                                 contains = true;
                                 editMeetingAttendeesSearchLabel.setStyle("-fx-text-fill: red");
@@ -911,7 +1030,7 @@ public class DiaryController  implements Initializable {
                     }
                     if(!contains) {
                         for(Employee emp : employees) {
-                            if(user.length > 0) {
+                            if(user.length > 1) {
                                 if (emp.getEmail().equals(user[1])) {
                                     editMeetingAttendeesSearchLabel.setStyle(null);
                                     eventAttendees.add(emp);
@@ -932,16 +1051,7 @@ public class DiaryController  implements Initializable {
             editMeetingAttendeesList.getChildren().add(createAttendeeHBox(emp, eventAttendees));
         }
 
-//        EventHandler<ActionEvent> cancelEvent = new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                editMeetingCancel.setOnAction(null);
-//                closePane(editMeetingVBox);
-//                closePane(editMeetingSuggestionVBox);
-//            }
-//        };
-//        editMeetingCancel.setOnAction(cancelEvent);
-
+        //when schedule button is pressed
         editMeetingSchedule.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
@@ -949,6 +1059,7 @@ public class DiaryController  implements Initializable {
                     try {
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
+                        //new calendar is initialised and set to the start date of the meeting
                         Calendar start = Calendar.getInstance();
                         start.setTime(sdf.parse(editMeetingDate.getValue().toString()));
 
@@ -956,12 +1067,10 @@ public class DiaryController  implements Initializable {
                         int h = Integer.parseInt(time[0]);
                         int m = Integer.parseInt(time[1]);
 
+                        //meeting duration is set in milliseconds
                         long newDuration = (h * 60 + m) * 60000;
 
-//                        Calendar end = (Calendar) start.clone();
-//                        end.add(Calendar.HOUR_OF_DAY, h);
-//                        end.add(Calendar.MINUTE, m);
-
+                        //event start is assigned to a new calendar
                         Calendar eventStart = Calendar.getInstance();
                         eventStart.setTime(sdf.parse(editMeetingDate.getValue().toString()));
                         time = editMeetingTime.getValue().toString().split(":");
@@ -970,6 +1079,7 @@ public class DiaryController  implements Initializable {
                         eventStart.set(Calendar.HOUR_OF_DAY, h);
                         eventStart.set(Calendar.MINUTE, m);
 
+                        //event end is assigned to a new calendar
                         Calendar eventEnd = (Calendar) eventStart.clone();
                         time = editMeetingDuration.getValue().toString().split(":");
                         h = Integer.parseInt(time[0]);
@@ -977,53 +1087,49 @@ public class DiaryController  implements Initializable {
                         eventEnd.add(Calendar.HOUR_OF_DAY, h);
                         eventEnd.add(Calendar.MINUTE, m);
 
+                        //all of the available slots are retrived
                         LinkedList<Event> open = getOpenSlots(start, newDuration, e.getId());
 
+                        //checks if the event fits in the selected range
                         boolean fits = false;
                         for (Event tmpE : open) {
-                            System.out.printf("\nOpen slot start: %s\nOpen slot end: %s\n", tmpE.getStart().toString(), tmpE.getEnd().toString());;
-                            System.out.printf("\nEvent slot start: %s\nEvent slot end: %s\n", eventStart.getTime(), eventEnd.getTime());
                             if(tmpE.getStart().compareTo(eventStart.getTime()) <= 0 &&
                                     tmpE.getEnd().compareTo(eventEnd.getTime()) >= 0) {
-                                System.out.println("time slot fits");
                                 fits = true;
-                            } else {
-                                System.out.println("time slot does not fit");
                             }
                         }
 
+                        //if event its, new event with new information is created
                         if(fits) {
-                            System.out.println("you can schedule the meeting in the wanted time frame");
-                            // TODO: 22/03/2018 add alert if tx fails
                             Event tmpEvent = new Event(e.getId(), editMeetingTitle.getText(),
                                     editMeetingDescription.getText(), eventStart.getTime().toInstant().toString(),
                                     eventEnd.getTime().toInstant().toString(), e.getOrganizer().getId(),
                                     editMeetingLocation.getText(),
                                     editMeetingPriority.getSelectionModel().getSelectedIndex());
-//                            }
 
+                            //if event is being created
                             if(tmpEvent.getId() <= 0) {
                                 if(db.createEvent(tmpEvent, eventAttendees)){
-                                    System.out.println("event created");
-                                    closePane(editMeetingVBox);
-                                    displayMeetings();
-                                    populateEventListView();
-                                }
-                            } else {
-                                if(db.updateEvent(tmpEvent, eventAttendees)) {
-                                    System.out.println("event updated");
                                     closePane(editMeetingVBox);
                                     displayMeetings();
                                     populateEventListView();
                                 } else {
-                                    System.out.println("Failed to update meeting");
+                                    createAlert("Failed to create event. Check log file");
+                                }
+                            } else { //if event is being deleted
+                                if(db.updateEvent(tmpEvent, eventAttendees)) {
+                                    closePane(editMeetingVBox);
+                                    displayMeetings();
+                                    populateEventListView();
+                                } else {
+                                    createAlert("Failed to update event. Check log file");
                                 }
                             }
-                        } else {
-                            System.out.println("you cannot schedule the meeting in the wanted time frame");
-//                            ObservableList<String> list = FXCollections.observableArrayList();
+                        } else { //if the event does not fit in the selected range
                             editMeetingSuggestionAccordion.getPanes().clear();
 
+                            //if the meeting cannot be created that day user is notified
+                            //otherwise user is prompted to select one of the available slots
                             if(open.size() == 0) {
                                 TitledPane tp = new TitledPane();
                                 tp.setText("The meeting cannot be scheduled today, please try another day");
@@ -1032,11 +1138,8 @@ public class DiaryController  implements Initializable {
                                 open.forEach((v) -> {
                                     Instant upperBound = Instant.ofEpochMilli(v.getEnd().getTime() - newDuration);
                                     editMeetingSuggestionAccordion.getPanes().add(createTitledPane(v.getStart().toInstant(), upperBound));
-//                                    list.add(v.getStart().toString());
                                 });
                                 showPane(editMeetingSuggestionVBox);
-//                                editMeetingSuggestionVBox.setDisable(false);
-//                                editMeetingSuggestionVBox.setOpacity(1.0);
                             }
                         }
 
@@ -1048,6 +1151,9 @@ public class DiaryController  implements Initializable {
         });
     }
 
+    /**
+     * populates meeting attendees list
+     */
     private void populateEditMeetingAttendeeList() {
         editMeetingAttendeesList.getChildren().clear();
         for(Employee emp : eventAttendees) {
@@ -1055,6 +1161,13 @@ public class DiaryController  implements Initializable {
         }
     }
 
+    /**
+     * Retrieves open slots where the meeting can be created
+     * @param day day when the meeting needs to be created
+     * @param duration duration of the meeting in milliseconds
+     * @param id id of the event, <= 0 means event is being created
+     * @return list of open slots who are embedded into event object
+     */
     private LinkedList<Event> getOpenSlots(Calendar day, long duration, int id) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -1062,8 +1175,6 @@ public class DiaryController  implements Initializable {
 
         LinkedList<Event> matchedEvents = db.getEmployeesEventsInRange(eventAttendees,
                 currentDay, id);
-
-        System.out.printf("\nEvents size: %d\n", matchedEvents.size());
 
         Calendar start = (Calendar) day.clone();
         Calendar end = (Calendar) day.clone();
@@ -1095,7 +1206,6 @@ public class DiaryController  implements Initializable {
 
             int bs = busy.size();
 
-
             for (int i = 0; i < bs; i++) {
                 if(i == 0) {
                     if(busy.get(i).getStart().getTime() - start.getTimeInMillis() >= duration) {
@@ -1118,16 +1228,15 @@ public class DiaryController  implements Initializable {
                 }
             }
         }
-        busy.forEach((v) -> {
-            System.out.printf("\nBusy: %s - %s", v.getStart().toString(), v.getEnd().toString());
-        });
-//
-        open.forEach((v) -> {
-            System.out.printf("\nOpen: %s - %s", v.getStart().toString(), v.getEnd().toString());
-        });
         return open;
     }
 
+    /**
+     * Crates titled pane populated with available start time, end time and sliders to select available slot
+     * @param start start date of an open window
+     * @param end end date of an open window
+     * @return Title pane object with the information
+     */
     private TitledPane createTitledPane(Instant start, Instant end) {
         TitledPane tp = new TitledPane();
         tp.getStylesheets().add(getClass().getResource("/css/main.css").toString());
@@ -1212,10 +1321,8 @@ public class DiaryController  implements Initializable {
             public void handle(ActionEvent event) {
                 if(editMeetingVBox.isDisabled() && !searchPotentialVBox.isDisabled()) {
                     clearEditEventDialogFields();
-//                    populateEditMeetingAttendeeList();
                     editMeetingDuration.setValue(searchPotentialDuration.getValue());
                     closePane(searchPotentialVBox);
-//                    showPane(editMeetingVBox);
                     Event e = new Event();
                     e.setId(-1);
                     e.setOrganizer(currentUser);
@@ -1244,6 +1351,12 @@ public class DiaryController  implements Initializable {
         return tp;
     }
 
+    /**
+     * Creates event attendee hbox for when adding employees to an event or searching for a potential meeting
+     * @param emp Employee object that contains the employee that needs to be added
+     * @param eventAttendees Event attendees list, needed in order to remove reference when pressing x button
+     * @return Hbox with employee name and button to delete the hbox
+     */
     private HBox createAttendeeHBox(Employee emp, LinkedList<Employee> eventAttendees) {
         HBox hBox = new HBox();
 
@@ -1310,6 +1423,12 @@ public class DiaryController  implements Initializable {
         return valid;
     }
 
+    /**
+     * checks if the node is in hierarchy of another node
+     * @param node node that is being clicked away from
+     * @param potentialHierarchyElement node that is being
+     * @return if the node is the hierarchy
+     */
     private static boolean inHierarchy(Node node, Node potentialHierarchyElement) {
         if (potentialHierarchyElement == null) {
             return true;
@@ -1323,6 +1442,10 @@ public class DiaryController  implements Initializable {
         return false;
     }
 
+    /**
+     * closes the pane that is wrapped in VBox
+     * @param box VBOX that wraps the pane
+     */
     private void closePane(VBox box) {
         FadeTransition fadeTransition = new FadeTransition();
         fadeTransition.setDuration(Duration.millis(100));
@@ -1334,9 +1457,12 @@ public class DiaryController  implements Initializable {
         box.setOpacity(0);
         box.setDisable(true);
         box.setOpacity(0);
-//        box.toBack();
     }
 
+    /**
+     * shows the pane that is wrapped in VBOX
+     * @param box VBOX that wraps the pane
+     */
     private void showPane(VBox box) {
         FadeTransition fadeTransition = new FadeTransition();
         fadeTransition.setDuration(Duration.millis(100));
@@ -1349,6 +1475,10 @@ public class DiaryController  implements Initializable {
         box.toFront();
     }
 
+    /**
+     * Shows and populates detailed meeting window
+     * @param e event object with all the information
+     */
     private void constructDetailedMeetingDialog(Event e) {
         meetingDetailsButtonsGrid.getChildren().clear();
         meetingDetailsDelete.setDisable(true);
@@ -1357,17 +1487,6 @@ public class DiaryController  implements Initializable {
         showPane(meetingDetailsVBox);
 
         meetingDetailsVBox.setStyle("-fx-background-color: rgb(255, 255, 255, 1)");
-
-//        EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                if(!inHierarchy(event.getPickResult().getIntersectedNode(), meetingDetailsVBox)) {
-//                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, this);
-//                    closePane(meetingDetailsVBox);
-//                }
-//            }
-//        };
-//        meetingsGrid.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
 
         meetingDetailsSubject.setText(e.getTitle());
         meetingDetailsDate.setText(new SimpleDateFormat("YYY-MM-dd").format(e.getStart()));
@@ -1427,10 +1546,8 @@ public class DiaryController  implements Initializable {
             edit.setOnAction(new EventHandler<ActionEvent>() {
                 @Override
                 public void handle(ActionEvent event) {
-//                    meetingsGrid.removeEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
                     closePane(meetingDetailsVBox);
                     constructEditEventDialog(e);
-                    System.out.println("Editing");
                 }
             });
             buttonGrid.add(edit, 1, 0);
@@ -1438,12 +1555,19 @@ public class DiaryController  implements Initializable {
         GridPane.setHgrow(buttonGrid, Priority.ALWAYS);
         meetingDetailsButtonsGrid.add(buttonGrid, 0, 3);
 
-        if(currentUser.getId() == e.getOrganizer().getId() || e.getStart().compareTo(currentDate.getTime()) < 0) {
+        Calendar tmp = Calendar.getInstance();
+
+        if(currentUser.getId() == e.getOrganizer().getId() || e.getStart().compareTo(tmp.getTime()) < 0) {
             meetingDetailsDelete.setDisable(false);
             meetingDetailsDelete.setOpacity(1.0);
         }
     }
 
+    /**
+     * Creates a button for detailed meeting dialog
+     * @param text Text that needs to be put on the button
+     * @return Created button
+     */
     private Button createButtonForDialog(String text) {
         Button button = new Button(text);
         button.setMinHeight(45);
@@ -1457,6 +1581,9 @@ public class DiaryController  implements Initializable {
         return button;
     }
 
+    /**
+     * Updates meeting display grid time start, end and intervals
+     */
     private void updateTimeInterval() {
         meetingsGrid.getChildren().clear();
         DateFormat df = new SimpleDateFormat("HH:mm");
@@ -1469,8 +1596,10 @@ public class DiaryController  implements Initializable {
         cal.set(Calendar.SECOND, 0);
         int startDate = cal.get(Calendar.DATE);
 
-        System.out.println(inter);
-        for(int i = 1; i <= (24-h)*60; i++) {
+        int eH = dayEnd.get(Calendar.HOUR_OF_DAY);
+        int eM = dayEnd.get(Calendar.MINUTE);
+
+        for(int i = 1; i <= ((eH*60+eM) - (h*60+m)); i++) {
             Pane p = new Pane();
             p.setMinHeight(60/inter);
             RowConstraints rc = new RowConstraints();
@@ -1485,7 +1614,8 @@ public class DiaryController  implements Initializable {
         }
 
         int index = 0;
-        while (cal.get(Calendar.DATE) == startDate) {
+        while (cal.get(Calendar.DATE) == startDate && (cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE))
+                < (dayEnd.get(Calendar.HOUR_OF_DAY) * 60 + dayEnd.get(Calendar.MINUTE))) {
             Label txt = new Label(df.format(cal.getTime()));
             txt.setStyle("-fx-text-fill: black");
             HBox hbox = new HBox();
@@ -1505,10 +1635,11 @@ public class DiaryController  implements Initializable {
     }
 
 
+    /**
+     * Watches the interval changes and updates the grid based on that
+     * @param action type of action event
+     */
     public void intervalAndTimeWatcher(ActionEvent action) {
-//        System.out.println(scheduleStart.getValue());
-//        System.out.println(scheduleEnd.getValue());
-//        System.out.println(scheduleIntervals.getValue());
         Date i;
         if(scheduleIntervals.getValue().toString().contains("min")) {
             i = verifyTime(scheduleIntervals.getValue().toString(), "mm 'min'");
@@ -1516,20 +1647,23 @@ public class DiaryController  implements Initializable {
             i = verifyTime(scheduleIntervals.getValue().toString(), "HH 'hour'");
         }
         Date t = verifyTime(scheduleStart.getValue().toString(), "HH:mm");
-        System.out.println(i);
 
         if(t != null) {
-            scheduleStart.setStyle(null);
             startTime.setTime(t);
         }
 
         if(i != null) {
-            scheduleIntervals.setStyle(null);
             interval.setTime(i);
         }
         updateTimeInterval();
     }
 
+    /**
+     * verifies if the time string fist the format specified
+     * @param time String with the time
+     * @param pattern pattern that time string has to match
+     * @return
+     */
     private Date verifyTime(String time, String pattern) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
         dateFormat.setLenient(false); //this will not enable 25:67 for example
@@ -1541,6 +1675,10 @@ public class DiaryController  implements Initializable {
     }
 
 
+    /**
+     * Listens whenver week is changed and updates the displayed meetings accordingly
+     * @param mouseEvent type of mouse event
+     */
     public void changeWeekEvent(MouseEvent mouseEvent) {
         JFXButton btn = (JFXButton) mouseEvent.getSource();
         String id = btn.getId();
@@ -1559,15 +1697,21 @@ public class DiaryController  implements Initializable {
         displayMeetings();
     }
 
+    /**
+     * Listen to changes in user selected date and update current week accordingly
+     * @param actionEvent type of action event
+     */
     public void dateChosen(ActionEvent actionEvent) {
         currentDate.setTime(Date.from(
                 datePicker.getValue().atStartOfDay(ZoneId.systemDefault()).toInstant()));
-        System.out.println(currentDate.getTime().toInstant());
         currentWeek.setText(String.format("WEEK %d", currentDate.get(Calendar.WEEK_OF_MONTH)));
         indicateCurrentDay();
         displayMeetings();
     }
 
+    /**
+     * displays current weeks events
+     */
     private void displayMeetings() {
         events = db.getEmployeeEvents(currentUser.getId());
         clearMeetings();
@@ -1586,12 +1730,12 @@ public class DiaryController  implements Initializable {
             int endM = end.get(Calendar.MONTH);
             int endD = end.get(Calendar.DAY_OF_MONTH);
 
-
+            //if the event matches all the criteria it then gets displayed
             if(startY == endY && startM == endM && startD == endD) {
                 if(start.get(Calendar.HOUR_OF_DAY) >= startTime.get(Calendar.HOUR_OF_DAY) &&
+                        end.get(Calendar.HOUR_OF_DAY) <= dayEnd.get(Calendar.HOUR_OF_DAY) &&
                         start.get(Calendar.WEEK_OF_YEAR) == currentDate.get(Calendar.WEEK_OF_YEAR)) {
 
-                    System.out.println("Adding meeting");
                     displayedEvents.add(e);
                     int[] meetingPos = getMeetingPosition(start, end);
                     StackPane pane = createMeetingPane(e);
@@ -1600,7 +1744,6 @@ public class DiaryController  implements Initializable {
                         public void handle(MouseEvent event) {
                             StackPane p = (StackPane) event.getSource();
                             constructDetailedMeetingDialog(displayedEvents.get(panes.indexOf(p)));
-                            System.out.printf("\nEvent: %s", displayedEvents.get(panes.indexOf(p)).getTitle());
                         }
                     });
                     panes.add(pane);
@@ -1609,7 +1752,11 @@ public class DiaryController  implements Initializable {
             }
         }
     }
-
+    /**
+     * Creates a stack pane with all the basic information to be displayed in compact view
+     * @param event Event object with information to be displayed
+     * @return populated stack pane object
+     */
     private StackPane createMeetingPane(Event event) {
         StackPane pane = new StackPane();
 
@@ -1652,6 +1799,11 @@ public class DiaryController  implements Initializable {
         return pane;
     }
 
+    /**
+     * Returns colours for border, background and time based on priority
+     * @param priority event or task priority
+     * @return String array with the css colours
+     */
     private String[] getPriorityColours(int priority) {
         String backAndBorderCol = "";
         String timeColor = "";
@@ -1676,6 +1828,12 @@ public class DiaryController  implements Initializable {
         return new String[]{backAndBorderCol, timeColor};
     }
 
+    /**y
+     * Calculates meeting position based on its start day, hour, minute, end day, hour, minute
+     * @param start start of the event
+     * @param end end of the event
+     * @return meeting position
+     */
     private int[] getMeetingPosition(Calendar start, Calendar end) {
         int minutes = (((end.get(Calendar.HOUR_OF_DAY) * 60 + end.get(Calendar.MINUTE)) -
                 (start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE))));
@@ -1683,12 +1841,13 @@ public class DiaryController  implements Initializable {
         int startMinute = start.get(Calendar.HOUR_OF_DAY) * 60 + start.get(Calendar.MINUTE) -
                 startTime.get(Calendar.HOUR_OF_DAY) * 60 - startTime.get(Calendar.MINUTE);
 
-        System.out.printf("DAY OF THE WEEK: %d", Calendar.DAY_OF_WEEK);
-
         int dayColumn = weekdayTranslate[start.get(Calendar.DAY_OF_WEEK)];
         return new int[]{dayColumn, startMinute, minutes};
     }
 
+    /**
+     * removes all of the displayed meetings
+     */
     private void clearMeetings() {
         for(Pane p : panes) {
             meetingsGrid.getChildren().remove(p);
@@ -1697,9 +1856,33 @@ public class DiaryController  implements Initializable {
         displayedEvents.clear();
     }
 
+    /**
+     * indicates current weekday with green underline
+     */
     private void indicateCurrentDay() {
         currentDayIndic.setStyle("-fx-border-width: 0 0 1 0; -fx-border-color: black");
         currentDayIndic = columnHeads.getChildren().get(weekdayTranslate[currentDate.get(Calendar.DAY_OF_WEEK)]);
         currentDayIndic.setStyle("-fx-border-width: 0 0 3 0; -fx-border-color: green");
+    }
+
+    /**
+     * Creates a dialog if something goes wrong to inform the user
+     * @param text
+     */
+    private void createAlert(String text) {
+        JFXDialogLayout content = new JFXDialogLayout();
+        content.setHeading(new Text("SOMETHING WENT WRONG"));
+        content.setBody(new Text(text));
+        JFXDialog dialog = new JFXDialog(rootDiaryPane, content, JFXDialog.DialogTransition.CENTER);
+        JFXButton button = new JFXButton("Close");
+        button.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                dialog.close();
+            }
+        });
+        content.setActions(button);
+
+        dialog.show();
     }
 }
